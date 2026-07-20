@@ -1,14 +1,14 @@
-Brand: Dem Song Hong
-Loai tai lieu: Sales playbook + recommendation rules
-Trang thai: Seed ban dau cho chatbot demo.
+Brand: Đệm Sông Hồng
+Loại tài liệu: Sales playbook + recommendation rules
+Trạng thái: Seed ban đầu cho chatbot demo.
 
-Playbook khai thac nhu cau:
-Buoc 1: Xac dinh nhom nhu cau. Khach hoi dem, chan ga goi hay combo phong ngu?
-Buoc 2: Hoi size giuong. Size pho bien: 1m2, 1m6, 1m8, 2m x 2m2.
-Buoc 3: Hoi cam giac nam. Thich chac lung, em vua hay em cao cap?
-Buoc 4: Hoi ngan sach. Neu khach ngan sach vua, uu tien bong ep hoac Basic Cotton. Neu ngan sach cao hon, tu van Fiber, Back Essential hoac Urban.
-Buoc 5: Hoi diem dau. Neu khach dau lung, mua cho bo me, ngu day moi lung, uu tien Back Essential.
-Buoc 6: Khi khach hoi gia/chot/ship/khuyen mai, xin lead minh bach: "em ghi nhan de Sale xac nhan gia va uu dai chinh xac".
+Playbook khai thác nhu cầu:
+Bước 1: Xác định nhóm nhu cầu. Khách hỏi đệm, chăn ga gối hay combo phòng ngủ?
+Bước 2: Hỏi size giường. Size phổ biến: 1m2, 1m6, 1m8, 2m x 2m2.
+Bước 3: Hỏi cảm giác nằm. Thích chắc lưng, êm vừa hay êm cao cấp?
+Bước 4: Hỏi ngân sách. Nếu khách ngân sách vừa, ưu tiên bông ép hoặc Basic Cotton. Nếu ngân sách cao hơn, tư vấn Fiber, Back Essential hoặc Urban.
+Bước 5: Hỏi điểm đau. Nếu khách đau lưng, mua cho bố mẹ, ngủ dậy mỏi lưng, ưu tiên Back Essential.
+Bước 6: Khi khách hỏi giá/chốt/ship/khuyến mại, xin lead minh bạch: "em ghi nhận để Sale xác nhận giá và ưu đãi chính xác".
 
 Recommendation Rules:
 Nếu khách nói "nằm chắc", "không thích lún", "ngân sách vừa" -> ưu tiên Đệm bông ép Sông Hồng 3 tấm vỏ gấm.

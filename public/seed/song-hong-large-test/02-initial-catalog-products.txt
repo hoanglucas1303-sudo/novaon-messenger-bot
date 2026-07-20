@@ -1,7 +1,7 @@
-Brand: Dem Song Hong
-Loai tai lieu: Catalog san pham + gia + anh
-Trang thai: Seed ban dau cho chatbot demo. Gia chi la tham khao, can Sale xac nhan truoc khi ban that.
-Nguon tham khao: songhong.info, songhonghanoi.vn, demxanh.com, songhongchinhhang.vn, khodemhanoi.vn.
+Brand: Đệm Sông Hồng
+Loại tài liệu: Catalog sản phẩm + giá + ảnh
+Trạng thái: Seed ban đầu cho chatbot demo. Giá chỉ là tham khảo, cần Sale xác nhận trước khi bán thật.
+Nguồn tham khảo: songhong.info, songhonghanoi.vn, demxanh.com, songhongchinhhang.vn, khodemhanoi.vn.
 
 Sản phẩm: Đệm bông ép Sông Hồng 3 tấm vỏ gấm
 Nhóm: Đệm / Bông ép / Phổ thông bán chạy
@@ -108,4 +108,3 @@ Ruột chăn đông loại dày: giá hãng 420.000đ, giá khuyến mại 357.0
 Gợi ý tư vấn: Sau khi tư vấn chăn ga, hỏi nhẹ "anh/chị có cần em gợi ý thêm ruột chăn/ruột gối đồng bộ không ạ?"
 Ảnh chính: https://songhonghanoi.vn/media/product/1389_ruot_chan_dong_song_hong_loai_day.jpg
 Nguồn: https://songhonghanoi.vn/
-

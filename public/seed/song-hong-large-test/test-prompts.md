@@ -1,43 +1,43 @@
-# Test Prompts: Song Hong Large Test
+# Test Prompts: Sông Hồng Large Test
 
-Dung cac prompt nay tren `/chat/song-hong-demo?model=auto` hoac Messenger page test.
+Dùng các prompt này trên `/chat/song-hong-demo?model=auto` hoặc Messenger page test.
 
-## Tu van san pham
+## Tư Vấn Sản Phẩm
 
-1. Nha minh giuong 1m6, minh thich nam chac lung, ngan sach tam 3 trieu thi nen xem dong nao?
-2. Minh hay dau lung, ngu day bi moi lung, co dem nao tot hon bong ep khong?
-3. Dem bong ep voi sieu nay khac nhau nhu the nao?
-4. Mua cho bo me ngoai 60 tuoi thi nen chon loai nao?
-5. Phong master nha moi, minh muon bo chan ga goi dep hon dong basic.
+1. Nhà mình giường 1m6, mình thích nằm chắc lưng, ngân sách tầm 3 triệu thì nên xem dòng nào?
+2. Mình hay đau lưng, ngủ dậy bị mỏi lưng, có đệm nào tốt hơn bông ép không?
+3. Đệm bông ép với siêu nảy khác nhau như thế nào?
+4. Mua cho bố mẹ ngoài 60 tuổi thì nên chọn loại nào?
+5. Phòng master nhà mới, mình muốn bộ chăn ga gối đẹp hơn dòng basic.
 
-## Gia va kich thuoc
+## Giá Và Kích Thước
 
-1. Dem bong ep 160x200 day 9cm gia bao nhieu?
-2. Back Essential 180x200 day 17cm gia tam bao nhieu?
-3. Co gia size 1m4 khong?
-4. Gia nay co phai gia khuyen mai hom nay khong?
-5. Neu mua ca dem va ga goi thi combo tam bao nhieu?
+1. Đệm bông ép 160x200 dày 9cm giá bao nhiêu?
+2. Back Essential 180x200 dày 17cm giá tầm bao nhiêu?
+3. Có giá size 1m4 không?
+4. Giá này có phải giá khuyến mại hôm nay không?
+5. Nếu mua cả đệm và ga gối thì combo tầm bao nhiêu?
 
-## Anh san pham
+## Ảnh Sản Phẩm
 
-1. Gui minh anh dem bong ep.
-2. Cho minh xem anh Back Essential.
-3. Co anh bo chan ga goi Urban khong?
-4. Gui anh dong nao hop voi nguoi dau lung.
+1. Gửi mình ảnh đệm bông ép.
+2. Cho mình xem ảnh Back Essential.
+3. Có ảnh bộ chăn ga gối Urban không?
+4. Gửi ảnh dòng nào hợp với người đau lưng.
 
-## Lead capture
+## Lead Capture
 
-1. Minh muon mua dem bong ep 1m6, goi minh so 0912345678 nhe, minh ten Nam.
-2. Bao sale tu van cho chi Lan so 0987654321, chi can dem cho nguoi dau lung.
-3. Minh o Cau Giay, can bao gia Back Essential 180x200, SĐT 0901234567.
-4. Co giao trong tuan nay khong? Neu duoc goi toi 0933333333.
+1. Mình muốn mua đệm bông ép 1m6, gọi mình số 0912345678 nhé, mình tên Nam.
+2. Báo Sale tư vấn cho chị Lan số 0987654321, chị cần đệm cho người đau lưng.
+3. Mình ở Cầu Giấy, cần báo giá Back Essential 180x200, SĐT 0901234567.
+4. Có giao trong tuần này không? Nếu được gọi tôi 0933333333.
 
-## Update knowledge
+## Update Knowledge
 
 Test sau khi import `05-update-price-and-new-products.txt`:
 
-1. Ben minh co mau BC26 moi khong?
-2. Chăn đông Basic Cotton gia bao nhieu?
-3. Minh mua bo chan ga, co can mua them ruot goi khong?
-4. Size 1m4 co gia dem bong ep chua?
+1. Bên mình có mẫu BC26 mới không?
+2. Chăn đông Basic Cotton giá bao nhiêu?
+3. Mình mua bộ chăn ga, có cần mua thêm ruột gối không?
+4. Size 1m4 có giá đệm bông ép chưa?
 
