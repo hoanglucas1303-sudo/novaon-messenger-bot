@@ -19,7 +19,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 
 ## Lộ trình (phase — dừng review từng bước)
 
-- [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express.
+- [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express. ✅ VERIFIED 2026-07-20 (echo chạy thật trên page Nobo AI).
 - [ ] **Phase 1 — Trả lời bằng AI (A):** knowledge đơn giản + persona/luật → LLM soạn câu trả lời.
 - [ ] **Phase 2 — Gửi ảnh:** gắn ảnh vào sản phẩm, LLM tự quyết gửi.
 - [ ] **Phase 3 — RAG thật:** pgvector + tìm kiếm ngữ nghĩa (brainstorm thêm).
@@ -28,7 +28,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 
 ## Trạng thái hiện tại
 
-**Phase 0 — scaffold xong, chờ nối Meta.**
+**Phase 0 — XONG & chạy thật (2026-07-20).** Bot echo trả lời trên page Nobo AI.
 
 Cấu trúc:
 ```
@@ -38,12 +38,22 @@ src/config.js      đọc env
 .env.example       PAGE_ACCESS_TOKEN, VERIFY_TOKEN, APP_SECRET, OPENROUTER_API_KEY...
 ```
 
-## Việc cần Lộc / còn treo
+## Hạ tầng đã dựng (identifiers)
 
-- **Fanpage test:** Lộc chọn/tạo page nào để test? (cần quyền admin)
-- **Deploy Railway** để có URL https công khai cho webhook (Meta yêu cầu https).
-- **Tạo Meta App + lấy PAGE_ACCESS_TOKEN + cấu hình Webhook:** Claude lái hộ qua trình duyệt, Lộc đăng nhập Facebook + bấm xác nhận.
-- **Key OpenRouter:** dùng lại key Future Content hay cấp riêng? (Phase 1 mới cần.)
+- **GitHub:** `hoanglucas1303-sudo/novaon-messenger-bot` (branch `main`, Railway auto-deploy).
+- **Railway:** project **zealous-stillness** › service **novaon-messenger-bot**.
+  - URL: `https://novaon-messenger-bot-production.up.railway.app` — webhook `/webhook`.
+  - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN=novaon-messenger-verify-2026`, `LLM_MODEL=anthropic/claude-sonnet-4.6`.
+  - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `OPENROUTER_API_KEY` (Phase 1).
+- **Meta App:** "Novaon Chatbot", **App ID `37150034544642460`** (Business, use case "Tương tác với khách hàng trên Messenger"). Đang **Development mode**.
+- **Fanpage test:** **Nobo Ai** — Page ID `1220791817792373` (profile URL `facebook.com/profile.php?id=61592078012566`). Webhook subscribe: `messages`, `messaging_postbacks`.
+- Token đưa vào Railway do **Lộc dán tay** (credential — Claude không nhập/đọc token).
+
+## Việc còn treo
+
+- **Key OpenRouter:** dùng lại key Future Content hay cấp riêng? (Phase 1 cần → set `OPENROUTER_API_KEY` trên Railway.)
+- **APP_SECRET:** set sau để bật verify chữ ký webhook (hardening).
+- **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
 ## Ghi chú kỹ thuật
 

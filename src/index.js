@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { config, warnMissingConfig } from './config.js';
 import { sendText, sendTypingOn } from './messenger.js';
+import { generateReply } from './llm.js';
 
 const app = express();
 
@@ -58,12 +59,14 @@ async function handleEvent(event) {
   const senderId = event.sender?.id;
   if (!senderId) return;
 
-  // Phase 0: chỉ echo lại text. Phase 1 sẽ thay khối này bằng LLM.
+  // Phase 1: trả lời bằng AI (persona + luật + knowledge trong knowledge.js).
   if (event.message?.text) {
     const text = event.message.text;
     console.log(`[msg] ${senderId}: ${text}`);
     await sendTypingOn(senderId);
-    await sendText(senderId, `Bạn vừa nói: "${text}"`);
+    const reply = await generateReply(senderId, text);
+    await sendText(senderId, reply);
+    console.log(`[bot] ${senderId}: ${reply}`);
   } else if (event.message?.attachments) {
     await sendText(senderId, 'Mình đã nhận được tệp đính kèm của bạn 👍');
   } else if (event.postback) {
