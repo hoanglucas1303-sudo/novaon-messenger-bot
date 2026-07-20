@@ -249,9 +249,25 @@ function normalizeProducts(items = []) {
       sizes: normalizeStringArray(item.sizes),
       thickness: normalizeStringArray(item.thickness),
       price: cleanText(item.price, 200),
+      priceNote: cleanText(item.priceNote || item.price_note, 500),
+      sourceUrl: cleanText(item.sourceUrl || item.source_url, 500),
+      variants: normalizeVariants(item.variants),
       images: normalizeStringArray(item.images),
     }))
     .filter((item) => item.id && item.name);
+}
+
+function normalizeVariants(items = []) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item) => ({
+      size: cleanText(item.size, 120),
+      thickness: cleanText(item.thickness, 120),
+      listPrice: normalizeNumber(item.listPrice || item.list_price),
+      salePrice: normalizeNumber(item.salePrice || item.sale_price),
+      note: cleanText(item.note, 240),
+    }))
+    .filter((item) => item.size || item.thickness || item.listPrice || item.salePrice || item.note);
 }
 
 function normalizePageIds(value = []) {
@@ -292,4 +308,10 @@ function cleanSlug(value) {
 function cleanText(value, maxLength) {
   if (typeof value !== 'string') return '';
   return value.trim().slice(0, maxLength);
+}
+
+function normalizeNumber(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  const number = Number(String(value || '').replace(/[^\d]/g, ''));
+  return Number.isFinite(number) && number > 0 ? number : null;
 }

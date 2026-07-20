@@ -84,3 +84,13 @@ Route chính:
 - `/chat/song-hong-demo` — web chat test campaign Sông Hồng
 
 Khi có Postgres, campaign được lưu vào bảng `campaigns`. Nếu chưa có `DATABASE_URL`, app dùng campaign Sông Hồng trong bộ nhớ để vẫn test được web chat; dữ liệu tạo mới không bền sau redeploy.
+
+## Product Catalog Test Data
+
+Campaign Sông Hồng demo hiện có catalog giàu hơn để test hỏi giá/ảnh:
+
+- Biến thể giá tham khảo cho đệm bông ép, siêu nảy Fiber, Back Essential và một số bộ chăn ga gối.
+- Ảnh sản phẩm public từ các website bán hàng/đại lý, đi qua proxy `/assets/remote-image` trên backend để Messenger/web chat nhận ảnh từ domain Railway.
+- Rule bot chỉ nói giá là tham khảo theo catalog, không cam kết khuyến mại còn hiệu lực và vẫn xin thông tin để Sale xác nhận khi khách muốn mua.
+
+Các nguồn giá/ảnh hiện đang dùng gồm `demxanh.com`, `songhonghanoi.vn` và `songhongonline.vn`. Dữ liệu này phục vụ test flow, chưa phải nguồn giá chính thức để bán thật.

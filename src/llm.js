@@ -17,9 +17,32 @@ function renderCatalog(catalogProducts) {
       if (p.sizes?.length) lines.push(`   - Kích thước: ${p.sizes.join(', ')}`);
       if (p.thickness?.length) lines.push(`   - Độ dày: ${p.thickness.join(', ')}`);
       if (p.price) lines.push(`   - Giá: ${p.price}`);
+      if (p.priceNote) lines.push(`   - Ghi chú giá: ${p.priceNote}`);
+      if (p.variants?.length) {
+        const variants = p.variants
+          .slice(0, 8)
+          .map((v) => {
+            const label = [v.size, v.thickness].filter(Boolean).join(' / ');
+            const prices = [
+              v.listPrice ? `giá hãng ${formatCurrency(v.listPrice)}` : '',
+              v.salePrice ? `giá KM ${formatCurrency(v.salePrice)}` : '',
+              v.note || '',
+            ]
+              .filter(Boolean)
+              .join(', ');
+            return `${label}${prices ? `: ${prices}` : ''}`;
+          })
+          .join('; ');
+        lines.push(`   - Biến thể/giá tham khảo: ${variants}`);
+      }
+      if (p.sourceUrl) lines.push(`   - Nguồn giá tham khảo: ${p.sourceUrl}`);
       return lines.join('\n');
     })
     .join('\n\n');
+}
+
+function formatCurrency(value) {
+  return `${Number(value).toLocaleString('vi-VN')}đ`;
 }
 
 // Dựng system prompt từ persona + luật + catalog (Kiểu A)

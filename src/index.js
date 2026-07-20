@@ -7,6 +7,7 @@ import { createLead, initDatabase } from './db.js';
 import { findCampaignByPageId, initCampaignStore } from './campaigns.js';
 import { mountDashboard } from './dashboard.js';
 import { mountStudio } from './studio.js';
+import { mountMediaRoutes } from './media.js';
 import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
 
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Phục vụ ảnh sản phẩm tự host: public/products/*.jpg -> /assets/products/*.jpg
 // (Production: Client upload ảnh vào đây; hiện Phase 2 test dùng ảnh placeholder trong knowledge.js)
+mountMediaRoutes(app);
 app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)

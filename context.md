@@ -48,6 +48,8 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Platform foundation — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Campaign Builder `/studio` (cần `DASHBOARD_PASSWORD`), GUI demo `/studio/demo`, web chat public `/chat/song-hong-demo`, API `/api/chat`. Campaign là brain dùng chung cho Messenger + Web Chat. Messenger map campaign bằng Page ID (`event.recipient.id`). Nếu chưa có DB, app dùng campaign Sông Hồng fallback trong RAM; dùng thật cần Railway Postgres.
 
+**Product catalog test data — CODE IMPLEMENTED (2026-07-20).** Đã enrich campaign Sông Hồng fallback bằng giá tham khảo/biến thể và ảnh public từ nguồn online (`demxanh.com`, `songhonghanoi.vn`, `songhongonline.vn`). Ảnh đi qua proxy `/assets/remote-image` với allowlist domain. Dữ liệu phục vụ test flow hỏi giá/ảnh, chưa phải nguồn giá chính thức để bán thật.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh
@@ -57,6 +59,7 @@ src/db.js          Postgres helper + tự tạo bảng leads + CRUD trạng thá
 src/campaigns.js   campaign store DB/fallback + default campaign Sông Hồng
 src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái; /leads/demo để xem UI bằng dữ liệu mẫu
 src/studio.js      Campaign Builder /studio + web chat /chat/:slug + API /api/chat
+src/media.js       proxy ảnh public qua /assets/remote-image với allowlist domain
 src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sửa)
 src/config.js      đọc env
 public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders.mjs)
@@ -93,4 +96,5 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **LLM quyết gửi ảnh** bằng cách chèn dòng `##IMG: <id>` ở cuối (llm.js parse + gỡ khỏi text). Đơn giản, chưa cần tool-calling.
 - **LLM ghi nhận lead** bằng cách chèn dòng `##LEAD: {"customerName":"...","phone":"...","productInterest":"...","note":"..."}` ở cuối khi đã có SĐT. Backend parse + gỡ khỏi text + lưu bảng `leads`; nếu chưa có `DATABASE_URL` thì chỉ log.
 - **Campaign model:** campaign chứa persona, rules, knowledge, products, page_ids, active. Core LLM dùng campaign; Messenger/Web Chat chỉ là adapter.
+- **Giá/ảnh sản phẩm:** catalog hiện có `variants`, `priceNote`, `sourceUrl`, `images`. Bot được phép báo giá tham khảo trong catalog nhưng không cam kết khuyến mại/chốt giá thay Sale.
 - Persona/luật/catalog nằm trong `src/knowledge.js` (Kiểu A). Luật cấm markdown (Messenger hiện `*` thô).
