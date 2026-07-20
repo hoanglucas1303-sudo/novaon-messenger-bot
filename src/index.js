@@ -3,6 +3,8 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, warnMissingConfig } from './config.js';
+import { createLead, initDatabase } from './db.js';
+import { mountDashboard } from './dashboard.js';
 import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
 
@@ -18,6 +20,7 @@ app.use(
     },
   })
 );
+app.use(express.urlencoded({ extended: false }));
 
 // Phục vụ ảnh sản phẩm tự host: public/products/*.jpg -> /assets/products/*.jpg
 // (Production: Client upload ảnh vào đây; hiện Phase 2 test dùng ảnh placeholder trong knowledge.js)
@@ -25,8 +28,10 @@ app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)
 app.get('/', (_req, res) => {
-  res.send('Novaon Messenger Bot ✅ (Phase 2 — AI + ảnh). Webhook tại /webhook');
+  res.send('Novaon Messenger Bot ✅ (Phase v1 — AI + ảnh + lead capture). Webhook tại /webhook, dashboard tại /leads');
 });
+
+mountDashboard(app);
 
 // --- Xác minh webhook (Meta gọi 1 lần khi cấu hình) ---
 app.get('/webhook', (req, res) => {
@@ -72,10 +77,21 @@ async function handleEvent(event) {
     const text = event.message.text;
     console.log(`[msg] ${senderId}: ${text}`);
     await sendTypingOn(senderId);
-    const { text: reply, images } = await generateReply(senderId, text);
+    const { text: reply, images, lead, conversation } = await generateReply(senderId, text);
     await sendText(senderId, reply);
     if (images.length) await sendImages(senderId, images);
-    console.log(`[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}`);
+    if (lead) {
+      const savedLead = await createLead({
+        pageId: event.recipient?.id,
+        senderId,
+        lead,
+        conversation,
+      });
+      if (savedLead) console.log(`[lead] Đã lưu lead #${savedLead.id} từ ${senderId}`);
+    }
+    console.log(
+      `[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}${lead ? ' (+lead)' : ''}`
+    );
   } else if (event.message?.attachments) {
     await sendText(senderId, 'Mình đã nhận được tệp đính kèm của bạn 👍');
   } else if (event.postback) {
@@ -96,7 +112,15 @@ function verifySignature(req) {
   }
 }
 
-app.listen(config.port, () => {
+try {
+  await initDatabase();
+} catch (e) {
+  console.error('[db] Không khởi tạo được DB:', e);
+}
+
+export const server = app.listen(config.port, () => {
   warnMissingConfig();
   console.log(`[server] Novaon Messenger Bot chạy tại cổng ${config.port}`);
 });
+
+export { app };

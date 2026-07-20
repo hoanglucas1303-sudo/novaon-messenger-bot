@@ -39,11 +39,27 @@ hãy trả lời bình thường, rồi THÊM một dòng RIÊNG ở CUỐI theo
 Ví dụ khách muốn xem đệm bông ép → thêm dòng cuối: ##IMG: bong-ep
 Có thể gửi ảnh nhiều sản phẩm: ##IMG: bong-ep, back-essential
 CHỈ thêm dòng này khi khách thật sự muốn xem ảnh, và chỉ dùng mã có trong danh mục.
-KHÔNG nhắc tới "##IMG" hay việc gửi ảnh bằng cú pháp trong lời thoại với khách.`;
+KHÔNG nhắc tới "##IMG" hay việc gửi ảnh bằng cú pháp trong lời thoại với khách.
+
+# GHI NHẬN LEAD CHO SALE
+Khi khách đã cung cấp số điện thoại, hoặc đồng ý để nhân viên tư vấn liên hệ và đã có số điện thoại trong hội thoại,
+hãy xác nhận minh bạch rằng bộ phận tư vấn sẽ liên hệ hỗ trợ, rồi THÊM một dòng RIÊNG ở CUỐI theo đúng cú pháp JSON:
+##LEAD: {"customerName":"<tên nếu biết>","phone":"<số điện thoại>","productInterest":"<sản phẩm quan tâm>","note":"<nhu cầu/ghi chú ngắn>"}
+Nếu chưa có số điện thoại thì KHÔNG thêm ##LEAD; hãy hỏi xin tên và số điện thoại một cách lịch sự.
+CHỈ dùng dữ liệu khách đã nói hoặc suy luận trực tiếp từ hội thoại, không bịa tên, số điện thoại, nhu cầu.
+KHÔNG nhắc tới "##LEAD" hay việc lưu bằng cú pháp trong lời thoại với khách.`;
 }
 
 // Tách dấu ##IMG khỏi câu trả lời, tra ra URL ảnh của sản phẩm tương ứng
-const IMG_MARKER = /##IMG:\s*([a-z0-9\-,\s]+)/i;
+const IMG_MARKER = /^##IMG:\s*([a-z0-9\-,\s]+)$/im;
+const LEAD_MARKER = /^##LEAD:\s*(\{.*\})$/im;
+
+export function parseReplyMarkers(reply) {
+  const { text: withoutLead, lead } = extractLead(reply);
+  const { text, images } = extractImages(withoutLead);
+  return { text, images, lead };
+}
+
 function extractImages(reply) {
   const m = reply.match(IMG_MARKER);
   const text = reply.replace(IMG_MARKER, '').trim();
@@ -61,6 +77,20 @@ function extractImages(reply) {
   return { text, images };
 }
 
+function extractLead(reply) {
+  const m = reply.match(LEAD_MARKER);
+  const text = reply.replace(LEAD_MARKER, '').trim();
+  if (!m) return { text, lead: null };
+
+  try {
+    const lead = JSON.parse(m[1]);
+    return { text, lead };
+  } catch (e) {
+    console.warn('[llm] Không parse được ##LEAD:', e);
+    return { text, lead: null };
+  }
+}
+
 // Bộ nhớ hội thoại ngắn hạn trong RAM (reset khi redeploy) — đủ cho MVP
 const histories = new Map();
 const MAX_TURNS = 8; // giữ tối đa 8 lượt (4 cặp hỏi–đáp)
@@ -72,12 +102,12 @@ function getHistory(senderId) {
 
 /**
  * Sinh câu trả lời cho 1 tin nhắn của khách.
- * @returns {Promise<{text: string, images: string[]}>}
+ * @returns {Promise<{text: string, images: string[], lead: object | null, conversation: object[]}>}
  */
 export async function generateReply(senderId, userText) {
   if (!config.openrouterApiKey) {
     console.warn('[llm] Thiếu OPENROUTER_API_KEY — trả lời tạm.');
-    return { text: brand.fallback, images: [] };
+    return { text: brand.fallback, images: [], lead: null, conversation: [] };
   }
 
   const history = getHistory(senderId);
@@ -104,26 +134,26 @@ export async function generateReply(senderId, userText) {
       const err = await res.text();
       console.error(`[llm] OpenRouter lỗi ${res.status}:`, err);
       history.pop(); // gỡ tin user vừa thêm để không kẹt lịch sử
-      return { text: brand.fallback, images: [] };
+      return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
     }
 
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content?.trim();
     if (!raw) {
       history.pop();
-      return { text: brand.fallback, images: [] };
+      return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
     }
 
-    const { text, images } = extractImages(raw);
-    // Lưu lịch sử bản đã gỡ dấu ##IMG cho sạch
+    const { text, images, lead } = parseReplyMarkers(raw);
+    // Lưu lịch sử bản đã gỡ dấu nội bộ cho sạch
     const cleanText = text || 'Dạ em gửi anh/chị xem ảnh ạ 😊';
     history.push({ role: 'assistant', content: cleanText });
     if (history.length > MAX_TURNS) history.splice(0, history.length - MAX_TURNS);
 
-    return { text: cleanText, images };
+    return { text: cleanText, images, lead, conversation: history.slice() };
   } catch (e) {
     console.error('[llm] Lỗi gọi OpenRouter:', e);
     history.pop();
-    return { text: brand.fallback, images: [] };
+    return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
   }
 }

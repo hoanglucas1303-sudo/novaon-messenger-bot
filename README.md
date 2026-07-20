@@ -14,6 +14,7 @@ npm run dev            # cổng 3010
 - `GET /` — health check
 - `GET /webhook` — Meta gọi để xác minh (dùng `VERIFY_TOKEN`)
 - `POST /webhook` — nhận sự kiện tin nhắn
+- `GET /leads` — mini dashboard xem lead, cần `DASHBOARD_PASSWORD`
 
 ## Nối Facebook Messenger (Phase 0)
 
@@ -32,3 +33,25 @@ npm run dev            # cổng 3010
 
 > **Development mode:** chỉ tài khoản có vai trò trong App (admin/dev/tester) mới nhắn thử được.
 > Khi go-live cho Client thật → nộp **App Review** xin quyền `pages_messaging`.
+
+## Lead capture v1
+
+Bot dùng cùng pattern với gửi ảnh: LLM chèn dòng nội bộ `##LEAD:{...}`, backend gỡ dòng này khỏi tin nhắn gửi khách và lưu vào Postgres.
+
+Field lead hiện có:
+
+- `customer_name`
+- `phone`
+- `product_interest`
+- `note`
+- `status` (`new` / `contacted`)
+- `conversation` (ngữ cảnh hội thoại gần nhất)
+
+Triển khai trên Railway:
+
+1. Gắn Railway Postgres vào service để có `DATABASE_URL`.
+2. Đặt `DASHBOARD_USER` và `DASHBOARD_PASSWORD`.
+3. Deploy lại service. App sẽ tự tạo bảng `leads` nếu chưa có.
+4. Mở `/leads` và đăng nhập bằng Basic Auth.
+
+Test nhanh trên Messenger: nhắn nhu cầu mua và để lại SĐT, ví dụ “Mình quan tâm đệm bông ép 1m6, gọi mình số 09xxxxxxxx”. Nếu AI phát lead đúng, dashboard sẽ có bản ghi mới.

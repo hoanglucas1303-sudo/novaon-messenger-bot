@@ -24,7 +24,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 - [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express. ✅ VERIFIED 2026-07-20 (echo chạy thật trên page Nobo AI).
 - [x] **Phase 1 — Trả lời bằng AI (A):** knowledge (persona+luật+catalog Sông Hồng) → LLM (OpenRouter). ✅ VERIFIED 2026-07-20.
 - [x] **Phase 2 — Gửi ảnh:** LLM chèn dấu `##IMG:<id>` → backend gửi ảnh sản phẩm. ✅ VERIFIED 2026-07-20 (ảnh hiện thật trên Messenger).
-- [ ] **➡️ TIẾP THEO — Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** Xem mục "Kế hoạch v1" bên dưới. Đặt nền DB cho Dashboard luôn.
+- [ ] **➡️ ĐANG LÀM — Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** Code đã implement 2026-07-20; chờ gắn Railway Postgres + `DASHBOARD_PASSWORD` rồi test thật trên Messenger để verify.
 - [ ] **Phase 3 — RAG thật:** pgvector + tìm kiếm ngữ nghĩa (brainstorm thêm).
 - [ ] **Phase 4 — Dashboard quản trị data:** persona/luật/catalog/ảnh (chuyển knowledge.js → DB) + xem lead + multi-tenant.
 - [ ] **Phase 5 — Go-live:** Meta App Review + Business Verification (~1-2 tuần chờ Meta) + (tùy chọn) Handover Protocol (live-takeover).
@@ -32,9 +32,9 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 ## Kế hoạch v1 — Lead capture (lát cắt tiếp theo)
 
 Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từng bước:
-1. **DB (Postgres Railway)** — bảng `leads`.
-2. **Bot ghi nhận:** khi khách để lại SĐT / đồng ý để tư vấn liên hệ → LLM phát dấu `##LEAD:{...}` (giống cơ chế `##IMG` đã chạy tốt) → backend **lưu lead** + xác nhận minh bạch với khách.
-3. **Trang xem lead** (mini dashboard) cho Sale: danh sách + chi tiết + ngữ cảnh hội thoại.
+1. **DB (Postgres Railway)** — bảng `leads`. ✅ Implement: app tự tạo bảng khi có `DATABASE_URL`.
+2. **Bot ghi nhận:** khi khách để lại SĐT / đồng ý để tư vấn liên hệ → LLM phát dấu `##LEAD:{...}` (giống cơ chế `##IMG` đã chạy tốt) → backend **lưu lead** + xác nhận minh bạch với khách. ✅ Implement code; chờ test thật.
+3. **Trang xem lead** (mini dashboard) cho Sale: danh sách + chi tiết + ngữ cảnh hội thoại. ✅ Implement `/leads` có Basic Auth; chờ set `DASHBOARD_PASSWORD`.
 
 **Field 1 lead (đề xuất, chờ Lộc chốt):** `Tên (nếu có)` · `SĐT` · `Sản phẩm quan tâm` · `Nhu cầu/Ghi chú` (bot tự tóm) · `Thời gian` · `Trạng thái` (mới / Sale đã liên hệ).
 **KHÔNG có trong v1:** bot tự chốt, hứa giá/khuyến mại cụ thể, live-takeover.
@@ -43,11 +43,15 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Phase 0-1-2 — XONG & verified thật (2026-07-20).** Bot Nobo AI: tư vấn AI (persona+luật+catalog Sông Hồng) + gửi ảnh. Đủ 3 tính năng lõi brief. Giọng bot đã chỉnh về hướng "xin thông tin cho Sale, không tự chốt".
 
+**Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, và mini dashboard `/leads`. Cần set `DATABASE_URL` + `DASHBOARD_PASSWORD` trên Railway rồi test bằng Messenger.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh
 src/messenger.js   Send API: sendText / sendImage / sendImages / sendTypingOn
-src/llm.js         gọi OpenRouter, build system prompt, lịch sử RAM, parse ##IMG
+src/llm.js         gọi OpenRouter, build system prompt, lịch sử RAM, parse ##IMG + ##LEAD
+src/db.js          Postgres helper + tự tạo bảng leads + CRUD trạng thái
+src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái
 src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sửa)
 src/config.js      đọc env
 public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders.mjs)
@@ -59,7 +63,7 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Railway:** project **zealous-stillness** › service **novaon-messenger-bot**.
   - URL: `https://novaon-messenger-bot-production.up.railway.app` — webhook `/webhook`.
   - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN=novaon-messenger-verify-2026`, `LLM_MODEL=anthropic/claude-sonnet-4.6`, `OPENROUTER_API_KEY` (key Future Content, Lộc dán tay).
-  - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `PUBLIC_BASE_URL` (mặc định = URL Railway), `DATABASE_URL` (khi làm lead capture).
+  - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `PUBLIC_BASE_URL` (mặc định = URL Railway), `DATABASE_URL` (cần cho lead capture), `DASHBOARD_PASSWORD` (cần để mở `/leads`).
 - **Meta App:** "Novaon Chatbot", **App ID `37150034544642460`** (Business, use case "Tương tác với khách hàng trên Messenger"). Đang **Development mode**.
 - **Fanpage test:** **Nobo Ai** — Page ID `1220791817792373` (profile URL `facebook.com/profile.php?id=61592078012566`). Webhook subscribe: `messages`, `messaging_postbacks`.
 - Token đưa vào Railway do **Lộc dán tay** (credential — Claude không nhập/đọc token).
@@ -68,6 +72,8 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 
 - **Key OpenRouter:** dùng lại key Future Content hay cấp riêng? (Phase 1 cần → set `OPENROUTER_API_KEY` trên Railway.)
 - **APP_SECRET:** set sau để bật verify chữ ký webhook (hardening).
+- **Railway Postgres:** cần gắn DB vào service để có `DATABASE_URL`, rồi deploy lại.
+- **Dashboard leads:** cần set `DASHBOARD_PASSWORD` (và tuỳ chọn `DASHBOARD_USER`, mặc định `novaon`) trước khi mở `/leads`.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
 ## Ghi chú kỹ thuật
@@ -78,4 +84,5 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Whitelist / Dev mode (làm rõ 2026-07-20):** *human trả lời* (từ hộp thư Trang) nhắn được **bất kỳ ai, luôn luôn** — không bị Dev mode giới hạn. Nhưng *bot trả lời* (qua Send API) chỉ tới được người có **vai trò app** (Admin/Dev/**Tester**). Human chat lại KHÔNG whitelist người đó cho bot. Muốn 1 người cụ thể chat được với bot ngay → **add làm Tester** (App Roles). Muốn mọi khách lạ → **App Review + Live**. (Khi Live còn luật cửa sổ 24h cho bot nhắn chủ động.)
 - **Gửi ảnh:** Facebook Send API KHÔNG fetch được ảnh từ `placehold.co` (lỗi #100 subcode 2018007 "không tải lên được"). → **PHẢI tự host ảnh** trên domain backend (`/assets/products/*.png`, phục vụ qua `express.static('public')`). Facebook fetch domain Railway của mình OK (cùng chỗ webhook). Ảnh placeholder sinh bằng `scripts/gen-placeholders.mjs`.
 - **LLM quyết gửi ảnh** bằng cách chèn dòng `##IMG: <id>` ở cuối (llm.js parse + gỡ khỏi text). Đơn giản, chưa cần tool-calling.
+- **LLM ghi nhận lead** bằng cách chèn dòng `##LEAD: {"customerName":"...","phone":"...","productInterest":"...","note":"..."}` ở cuối khi đã có SĐT. Backend parse + gỡ khỏi text + lưu bảng `leads`; nếu chưa có `DATABASE_URL` thì chỉ log.
 - Persona/luật/catalog nằm trong `src/knowledge.js` (Kiểu A). Luật cấm markdown (Messenger hiện `*` thô).
