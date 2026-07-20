@@ -10,6 +10,10 @@ export const config = {
   // LLM (Phase 1)
   openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
   llmModel: process.env.LLM_MODEL || 'anthropic/claude-sonnet-4.6',
+
+  // URL gốc công khai (để dựng link ảnh tự host cho Messenger fetch)
+  publicBaseUrl:
+    process.env.PUBLIC_BASE_URL || 'https://novaon-messenger-bot-production.up.railway.app',
 };
 
 // Cảnh báo sớm nếu thiếu cấu hình bắt buộc để gửi tin

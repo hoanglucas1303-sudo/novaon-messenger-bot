@@ -1,3 +1,8 @@
+import { config } from './config.js';
+
+// Link ảnh sản phẩm tự host trên backend (Facebook fetch được từ domain Railway)
+const img = (file) => `${config.publicBaseUrl}/assets/products/${file}`;
+
 // ============================================================================
 // KNOWLEDGE — "bộ não" do HUMAN viết (Kiểu A).
 // Đây là nơi người vận hành khai báo: bot là ai, trả lời theo luật gì, và biết
@@ -18,6 +23,7 @@ Bạn xưng "em", gọi khách là "anh/chị", giọng thân thiện, nhiệt t
     'Chỉ tư vấn về sản phẩm Đệm Sông Hồng có trong danh mục bên dưới. Nếu khách hỏi ngoài phạm vi (chủ đề khác, hãng khác), lịch sự mời khách quay lại chủ đề đệm Sông Hồng.',
     'TUYỆT ĐỐI không bịa thông tin. Nếu không có dữ liệu (đặc biệt là GIÁ chính xác), hãy nói sẽ để nhân viên tư vấn báo giá cụ thể — đừng tự đặt ra con số.',
     'Trả lời bằng tiếng Việt, ngắn gọn 2–4 câu, dễ đọc trên điện thoại, kèm 1 emoji nhẹ khi phù hợp.',
+    'Viết THUẦN VĂN BẢN, tuyệt đối KHÔNG dùng ký hiệu markdown (không *, **, #, gạch đầu dòng -) vì Messenger hiển thị thô các ký hiệu đó.',
     'Chủ động hỏi lại nhu cầu để tư vấn đúng: kích thước giường (1m2 / 1m6 / 1m8), ngân sách, sở thích đệm cứng hay êm, có hay đau lưng không.',
     'Khi khách có ý định mua hoặc muốn biết giá/khuyến mại, mời khách để lại số điện thoại hoặc ghé showroom để được tư vấn và báo giá chi tiết.',
     'Không hứa hẹn điều không chắc chắn (ngày giao, giảm giá cụ thể). Luôn giữ thái độ tôn trọng, kiên nhẫn.',
@@ -41,10 +47,7 @@ export const products = [
     sizes: ['1m2 x 2m', '1m6 x 2m', '1m8 x 2m'],
     thickness: ['5cm', '9cm'],
     price: 'Liên hệ để được báo giá & khuyến mại',
-    images: [
-      'https://placehold.co/800x600/9D174D/FFFFFF/png?text=Dem+Bong+Ep+Song+Hong',
-      'https://placehold.co/800x600/BE185D/FFFFFF/png?text=Dem+Bong+Ep+-+Gap+Gon',
-    ],
+    images: [img('bong-ep-1.png'), img('bong-ep-2.png')],
   },
   {
     id: 'sieu-nay-fiber',
@@ -56,7 +59,7 @@ export const products = [
     sizes: ['1m2 x 2m', '1m6 x 2m', '1m8 x 2m'],
     thickness: ['9cm', '10cm'],
     price: 'Liên hệ để được báo giá & khuyến mại',
-    images: ['https://placehold.co/800x600/9D174D/FFFFFF/png?text=Dem+Sieu+Nay+Fiber'],
+    images: [img('sieu-nay-1.png')],
   },
   {
     id: 'back-essential',
@@ -68,10 +71,7 @@ export const products = [
     sizes: ['1m6 x 2m', '1m8 x 2m'],
     thickness: ['17cm', '22cm', '27cm', '32cm'],
     price: 'Liên hệ để được báo giá & khuyến mại',
-    images: [
-      'https://placehold.co/800x600/9D174D/FFFFFF/png?text=Back+Essential+-+Memory+Foam',
-      'https://placehold.co/800x600/BE185D/FFFFFF/png?text=Back+Essential+-+Nang+Do+Cot+Song',
-    ],
+    images: [img('back-essential-1.png'), img('back-essential-2.png')],
   },
   {
     id: 'chan-ga-goi',
@@ -82,6 +82,6 @@ export const products = [
     features: ['Chất cotton mềm', 'Nhiều màu/hoạ tiết', 'Đồng bộ với đệm'],
     sizes: ['Theo kích thước giường 1m2 / 1m6 / 1m8'],
     price: 'Liên hệ để được báo giá',
-    images: ['https://placehold.co/800x600/9D174D/FFFFFF/png?text=Chan+Ga+Goi+Song+Hong'],
+    images: [img('chan-ga-goi-1.png')],
   },
 ];
