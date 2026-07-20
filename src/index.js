@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: false, limit: '2mb' }));
 // (Production: Client upload ảnh vào đây; hiện Phase 2 test dùng ảnh placeholder trong knowledge.js)
 mountMediaRoutes(app);
 app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
+app.use('/seed', express.static(path.join(__dirname, '..', 'public', 'seed')));
 
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)
 app.get('/', (_req, res) => {

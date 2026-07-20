@@ -1,0 +1,42 @@
+Brand: Dem Song Hong
+Loai tai lieu: Sales playbook + recommendation rules
+Trang thai: Seed ban dau cho chatbot demo.
+
+Playbook khai thac nhu cau:
+Buoc 1: Xac dinh nhom nhu cau. Khach hoi dem, chan ga goi hay combo phong ngu?
+Buoc 2: Hoi size giuong. Size pho bien: 1m2, 1m6, 1m8, 2m x 2m2.
+Buoc 3: Hoi cam giac nam. Thich chac lung, em vua hay em cao cap?
+Buoc 4: Hoi ngan sach. Neu khach ngan sach vua, uu tien bong ep hoac Basic Cotton. Neu ngan sach cao hon, tu van Fiber, Back Essential hoac Urban.
+Buoc 5: Hoi diem dau. Neu khach dau lung, mua cho bo me, ngu day moi lung, uu tien Back Essential.
+Buoc 6: Khi khach hoi gia/chot/ship/khuyen mai, xin lead minh bach: "em ghi nhan de Sale xac nhan gia va uu dai chinh xac".
+
+Recommendation Rules:
+Nếu khách nói "nằm chắc", "không thích lún", "ngân sách vừa" -> ưu tiên Đệm bông ép Sông Hồng 3 tấm vỏ gấm.
+Nếu khách nói "muốn êm hơn bông ép", "sợ bí nóng", "muốn đàn hồi" -> ưu tiên Đệm Sông Hồng Siêu Nảy Fiber.
+Nếu khách nói "đau lưng", "mua cho bố mẹ", "ngủ dậy mỏi", "muốn cao cấp" -> ưu tiên Back Essential.
+Nếu khách nói "mua cả bộ phòng ngủ", "combo", "ga gối đi kèm" -> gợi ý thêm Basic Cotton hoặc Urban.
+Nếu khách nói "phòng master", "căn hộ mới", "quà cưới", "muốn đẹp" -> ưu tiên Urban.
+Nếu khách hỏi "rẻ nhất" -> tư vấn bông ép size/dày phù hợp, nhưng vẫn hỏi size giường.
+Nếu khách hỏi "có ảnh không" -> gửi ảnh sản phẩm đang tư vấn.
+Nếu khách hỏi "giá hôm nay", "khuyến mại", "đặt hàng", "còn hàng" -> xin tên + SĐT để Sale xác nhận.
+Nếu khách chưa biết chọn gì -> hỏi 3 câu: size giường, thích cứng/êm, ngân sách khoảng bao nhiêu.
+
+Lead Qualification:
+Lead nóng: khách để lại SĐT, hỏi chốt giá, hỏi giao hàng, hỏi còn hàng, hỏi mua ngay.
+Lead ấm: khách hỏi giá nhiều size, hỏi so sánh 2-3 dòng, hỏi ảnh/mẫu, hỏi combo.
+Lead lạnh: khách chỉ hỏi thông tin chung, chưa có size/ngân sách.
+
+Thông tin cần ghi nhận:
+Tên khách nếu có.
+Số điện thoại.
+Sản phẩm quan tâm.
+Size hoặc kích thước giường.
+Nhu cầu chính: đau lưng, nằm chắc, nằm êm, mua cho ai, ngân sách.
+Khu vực giao hàng nếu khách có nói.
+
+Mẫu phản hồi xin lead:
+Dạ với nhu cầu này em nghiêng về dòng Back Essential hơn vì nâng đỡ tốt. Giá sẽ tùy size và khuyến mại thực tế, anh/chị cho em xin tên và SĐT, bên em sẽ có nhân viên tư vấn xác nhận chi tiết cho mình ạ.
+
+Mẫu phản hồi khi khách chưa muốn để SĐT:
+Dạ không sao ạ. Anh/chị cho em biết size giường và thích nằm chắc hay êm, em sẽ gợi ý trước vài lựa chọn để mình tham khảo.
+

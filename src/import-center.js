@@ -6,6 +6,7 @@ import {
   listCampaigns,
   saveCampaign,
 } from './campaigns.js';
+import { proxiedImageUrl } from './media.js';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const drafts = new Map();
@@ -37,16 +38,59 @@ Nếu khách hỏi giá, báo là giá tham khảo và xin SĐT để Sale xác 
 Nếu khách đau lưng, ưu tiên tư vấn Back Essential, nhưng vẫn hỏi thêm ngân sách và sở thích nằm cứng/êm.
 Nếu khách cần gấp gọn, ưu tiên đệm bông ép.`;
 
+const seedDocuments = [
+  {
+    id: 'brief',
+    title: 'Project brief',
+    path: '/seed/song-hong-large-test/01-initial-project-brief.md',
+    note: 'Dùng để tạo campaign mới và persona/rules ban đầu.',
+  },
+  {
+    id: 'initial-catalog',
+    title: 'Catalog + giá + ảnh',
+    path: '/seed/song-hong-large-test/02-initial-catalog-products.txt',
+    note: 'Import lần đầu để tạo product data đủ lớn.',
+  },
+  {
+    id: 'faq',
+    title: 'FAQ + chính sách',
+    path: '/seed/song-hong-large-test/03-initial-faq-policies.txt',
+    note: 'Bổ sung knowledge mềm, guardrails và câu trả lời mẫu.',
+  },
+  {
+    id: 'playbook',
+    title: 'Sales playbook',
+    path: '/seed/song-hong-large-test/04-initial-sales-playbook.txt',
+    note: 'Bổ sung recommendation rules và lead qualification.',
+  },
+  {
+    id: 'update',
+    title: 'Update giá + sản phẩm mới',
+    path: '/seed/song-hong-large-test/05-update-price-and-new-products.txt',
+    note: 'Import sau cùng để test cập nhật giá/thêm sản phẩm.',
+  },
+  {
+    id: 'prompts',
+    title: 'Test prompts',
+    path: '/seed/song-hong-large-test/test-prompts.md',
+    note: 'Kịch bản hỏi đáp để test web chat/Messenger.',
+  },
+];
+
 export function mountImportCenter(app) {
-  app.get('/studio/import/demo', (_req, res) => {
+  app.get('/studio/import/demo', (req, res) => {
+    const selectedSeed = getSeedDocument(req.query.seed);
     res.type('html').send(
       renderImportPage({
         title: 'Import Center Demo',
         body: renderImportForm({
           campaigns: [defaultCampaign()],
           action: '/studio/import/demo/analyze',
-          sourceText: sampleSource,
+          sourceText: selectedSeed ? '' : sampleSource,
+          sourceType: selectedSeed ? 'url' : 'text',
+          sourceUrl: selectedSeed ? publicSeedUrl(req, selectedSeed) : '',
           demo: true,
+          selectedSeed,
         }),
       })
     );
@@ -71,8 +115,9 @@ export function mountImportCenter(app) {
     );
   });
 
-  app.get('/studio/import', requireAdminAuth, route(async (_req, res) => {
+  app.get('/studio/import', requireAdminAuth, route(async (req, res) => {
     if (!ensureImportUnlocked(res)) return;
+    const selectedSeed = getSeedDocument(req.query.seed);
     const campaigns = await listCampaigns();
     res.type('html').send(
       renderImportPage({
@@ -81,7 +126,10 @@ export function mountImportCenter(app) {
           campaigns,
           action: '/studio/import/analyze',
           sourceText: '',
+          sourceType: selectedSeed ? 'url' : 'text',
+          sourceUrl: selectedSeed ? publicSeedUrl(req, selectedSeed) : '',
           demo: false,
+          selectedSeed,
         }),
       })
     );
@@ -428,7 +476,7 @@ function mergeTextLines(existing, nextLines) {
     .join('\n');
 }
 
-function renderImportForm({ campaigns, action, sourceText, demo }) {
+function renderImportForm({ campaigns, action, sourceText, sourceType = 'text', sourceUrl = '', demo, selectedSeed }) {
   const options = campaigns
     .map((campaign) => `<option value="${escapeHtml(campaign.slug)}">${escapeHtml(campaign.name)} (${escapeHtml(campaign.slug)})</option>`)
     .join('');
@@ -440,6 +488,7 @@ function renderImportForm({ campaigns, action, sourceText, demo }) {
         <p>Convert tài liệu client thành draft catalog, knowledge, rules và gợi ý tư vấn để PM review.</p>
       </div>
     </header>
+    ${renderSeedLibrary({ demo, selectedSeed })}
     <form class="editor" method="post" action="${action}">
       <section>
         <h2>Nguồn dữ liệu</h2>
@@ -449,13 +498,13 @@ function renderImportForm({ campaigns, action, sourceText, demo }) {
           </label>
           <label>Loại nguồn
             <select name="sourceType">
-              <option value="text">Text / bảng giá paste</option>
-              <option value="url">URL website</option>
+              <option value="text"${sourceType === 'text' ? ' selected' : ''}>Text / bảng giá paste</option>
+              <option value="url"${sourceType === 'url' ? ' selected' : ''}>URL website</option>
             </select>
           </label>
         </div>
         <label>URL website nếu chọn loại URL
-          <input name="sourceUrl" placeholder="https://example.com/catalog">
+          <input name="sourceUrl" value="${escapeHtml(sourceUrl)}" placeholder="https://example.com/catalog">
         </label>
       </section>
       <section>
@@ -471,6 +520,37 @@ function renderImportForm({ campaigns, action, sourceText, demo }) {
         }
       </div>
     </form>
+  `;
+}
+
+function renderSeedLibrary({ demo, selectedSeed }) {
+  const base = demo ? '/studio/import/demo' : '/studio/import';
+  return `
+    <section class="seed-library">
+      <div class="seed-head">
+        <div>
+          <h2>Seed tài liệu test</h2>
+          <p class="muted">Case Sông Hồng lớn: tạo dự án mới, import catalog, cập nhật giá/sản phẩm và test flow tư vấn.</p>
+        </div>
+        <a class="button secondary" href="/seed/song-hong-large-test/README.md" target="_blank" rel="noreferrer">README seed</a>
+      </div>
+      <div class="seed-list">
+        ${seedDocuments
+          .map(
+            (item) => `
+              <div class="seed-item${selectedSeed?.id === item.id ? ' active' : ''}">
+                <strong>${escapeHtml(item.title)}</strong>
+                <p>${escapeHtml(item.note)}</p>
+                <div>
+                  <a href="${base}?seed=${encodeURIComponent(item.id)}">Điền URL import</a>
+                  <a href="${escapeHtml(item.path)}" target="_blank" rel="noreferrer">Mở file</a>
+                </div>
+              </div>
+            `
+          )
+          .join('')}
+      </div>
+    </section>
   `;
 }
 
@@ -558,6 +638,13 @@ function renderImportPage({ title, body }) {
       .back { display: inline-block; margin-bottom: 8px; }
       section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; margin-bottom: 16px; }
       section.warning { background: var(--warn-bg); border-color: var(--warn-line); }
+      .seed-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+      .seed-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+      .seed-item { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fbfcfd; }
+      .seed-item.active { border-color: var(--brand); background: #ecfdf5; }
+      .seed-item strong { display: block; margin-bottom: 4px; }
+      .seed-item p { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+      .seed-item div { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; }
       label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 700; margin-bottom: 14px; }
       input, textarea, select { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; color: var(--text); font: inherit; background: #fff; }
       textarea { resize: vertical; }
@@ -568,6 +655,8 @@ function renderImportPage({ title, body }) {
         main { width: min(100% - 20px, 1180px); margin-top: 20px; }
         .topbar { flex-direction: column; align-items: flex-start; }
         .grid { grid-template-columns: 1fr; }
+        .seed-head { flex-direction: column; }
+        .seed-list { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -589,6 +678,17 @@ function ensureImportUnlocked(res) {
     })
   );
   return false;
+}
+
+function getSeedDocument(id) {
+  return seedDocuments.find((item) => item.id === String(id || '').trim()) || null;
+}
+
+function publicSeedUrl(req, seed) {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const baseUrl = host ? `${proto}://${host}` : config.publicBaseUrl;
+  return new URL(seed.path, `${baseUrl}/`).toString();
 }
 
 function route(handler) {
@@ -622,7 +722,7 @@ function normalizeProduct(product, sourceUrl) {
     priceNote: cleanText(product.priceNote || product.price_note, 500),
     sourceUrl: cleanText(product.sourceUrl || product.source_url || sourceUrl, 500),
     variants: normalizeVariants(product.variants),
-    images: normalizeStringArray(product.images),
+    images: normalizeStringArray(product.images).map(normalizeImageUrl),
   };
 }
 
@@ -688,6 +788,19 @@ function normalizeNumber(value) {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   const number = Number(String(value || '').replace(/[^\d]/g, ''));
   return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+function normalizeImageUrl(value) {
+  const url = String(value || '').trim();
+  if (!url || url.startsWith(`${config.publicBaseUrl}/assets/remote-image`)) return url;
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return url;
+    if (parsed.hostname === new URL(config.publicBaseUrl).hostname) return url;
+    return proxiedImageUrl(config.publicBaseUrl, url);
+  } catch {
+    return url;
+  }
 }
 
 function cleanSlug(value) {

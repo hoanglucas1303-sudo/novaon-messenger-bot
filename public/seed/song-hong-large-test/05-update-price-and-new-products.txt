@@ -1,0 +1,75 @@
+Brand: Dem Song Hong
+Loai tai lieu: Update gia + them san pham
+Trang thai: Seed update sau khi campaign da co du lieu ban dau. Dung de test luong "Update knowledge".
+Ngay update gia lap: 2026-07-20
+Nguon tham khao: songhonghanoi.vn, songhongchinhhang.vn, Shopee shop public, cac dai ly public.
+
+Thông báo cập nhật:
+Bang gia trong campaign can gan nhan "tham khao". Khi khach hoi chot gia hoac khuyen mai, bot phai xin SĐT de Sale xac nhan.
+Them nhom san pham ruot chan goi va bo chăn ga goi BC26 series de chatbot co the goi y upsell/combo.
+Cap nhat gợi ý có chủ đích: Khi khách mua đệm từ 160x200cm trở lên, bot nên hỏi có cần combo ga gối cùng size không.
+
+Sản phẩm: Bộ chăn ga gối Sông Hồng BC26 Series
+Nhóm: Chăn ga gối / Basic Cotton / Bộ mới
+Mô tả: Bộ chăn ga gối BC26 series là nhóm mẫu mới hơn trong catalog test, phù hợp nhu cầu thay mới phòng ngủ, mua combo với đệm hoặc mua quà gia đình. Giá tham khảo tương đối đồng nhất giữa các mã BC26.
+Phù hợp: khách cần bộ chăn ga gối cotton, mua kèm đệm, muốn mẫu mới, ngân sách vừa.
+Không phù hợp: khách cần dòng phủ cao cấp Urban hoặc chỉ mua ruột chăn/gối.
+Tính năng: nhiều mã mẫu; cotton dễ dùng; dễ bán theo combo; hợp size giường phổ biến.
+Kích thước phổ biến: 160x200cm, 180x200cm.
+Giá tham khảo:
+BC26 120: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+BC26 121: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+BC26 122: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+BC26 123: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+BC26 201: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+BC26 202: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+BC26 203: giá hãng 2.040.000đ, giá khuyến mại 1.734.000đ
+Gợi ý tư vấn: Nếu khách mua đệm, hỏi "anh/chị có muốn em gợi ý thêm bộ ga gối cotton cùng size để đồng bộ phòng ngủ không ạ?"
+Ảnh chính: https://media.loveitopcdn.com/33296/thumb/990x435/z6721112480170-1a8905f39ba77a2d7aaab3ad1e0b2f76.jpg?zc=1
+Nguồn: https://songhongchinhhang.vn/
+
+Sản phẩm: Chăn đông Sông Hồng Basic Cotton
+Nhóm: Chăn / Mùa đông / Basic Cotton
+Mô tả: Chăn đông Basic Cotton phù hợp mùa lạnh, có nhiều mã mẫu, giá dễ tiếp cận. Có thể bán kèm ga gối hoặc ruột chăn tùy nhu cầu.
+Phù hợp: khách cần chăn mùa đông, gia đình trẻ, mua thêm cùng bộ ga gối.
+Không phù hợp: khách chỉ cần đệm hoặc cần bộ phủ cao cấp.
+Tính năng: cotton dễ dùng; nhiều mẫu; hợp combo mùa đông.
+Kích thước phổ biến: 200x220cm.
+Giá tham khảo:
+Chăn đông Basic Cotton BC21029: giá hãng 1.070.000đ, giá khuyến mại 856.000đ
+Chăn đông Basic Cotton BC23086: giá hãng 1.070.000đ, giá khuyến mại 963.000đ
+Chăn đông Cotton 100% BC22-052 200x220cm: giá tham khảo 1.320.000đ
+Gợi ý tư vấn: Nếu khách hỏi chăn mùa đông, hỏi thêm dùng cho giường 1m6 hay 1m8 và có cần ga gối cùng mẫu không.
+Ảnh chính: https://songhonghanoi.vn/media/product/1448_chan_dong_song_hong_basic_cotton_bc21029.jpg
+Nguồn: https://songhonghanoi.vn/
+
+Sản phẩm: Ruột gối Sông Hồng 45x65cm
+Nhóm: Phụ kiện / Ruột gối
+Mô tả: Ruột gối kích thước 45x65cm, dễ bán kèm với vỏ gối hoặc bộ chăn ga gối. Đây là sản phẩm giá thấp để hoàn thiện combo.
+Phù hợp: khách mua ga gối, khách thay mới gối, khách cần combo tiết kiệm.
+Không phù hợp: khách hỏi riêng về đệm cao cấp.
+Tính năng: kích thước phổ biến; dễ mua kèm; giá thấp.
+Kích thước phổ biến: 45x65cm.
+Giá tham khảo:
+45x65cm: giá tham khảo 120.000đ
+Gợi ý tư vấn: Nếu khách mua ga gối nhưng chưa nhắc ruột gối, chỉ gợi ý nhẹ một câu, không ép.
+Ảnh chính: https://songhonghanoi.vn/media/product/ruot_goi_song_hong_45x65.jpg
+Nguồn: Shopee/Song Hong public listing
+
+Cập nhật giá cho sản phẩm đã có: Đệm bông ép Sông Hồng 3 tấm vỏ gấm
+Giá tham khảo bổ sung:
+140x190cm dày 5cm: giá hãng 2.270.000đ, giá khuyến mại 1.589.000đ
+140x190cm dày 7cm: giá hãng 2.680.000đ, giá khuyến mại 1.876.000đ
+120x200cm dày 9cm: giá hãng 2.790.000đ, giá khuyến mại 1.953.000đ
+Gợi ý tư vấn bổ sung: Neu khach hoi size 1m4 hoac 1m2, bot co du lieu de tra loi thay vi chi tu van size 1m6/1m8.
+
+Rules chatbot cập nhật:
+Khi tư vấn update giá, luôn nói "em đang có giá tham khảo theo catalog test".
+Khi khách hỏi combo, ưu tiên đề xuất đệm + Basic Cotton hoặc đệm + BC26 Series tùy ngân sách.
+Khi khách hỏi hàng mới, giới thiệu BC26 Series trước.
+
+Recommendation Rules cập nhật:
+Nếu khách hỏi mẫu mới hoặc bộ chăn ga gối mới -> ưu tiên BC26 Series.
+Nếu khách hỏi chăn mùa đông -> ưu tiên Chăn đông Basic Cotton.
+Nếu khách mua bộ chăn ga nhưng chưa có ruột gối -> gợi ý Ruột gối 45x65cm.
+Nếu khách hỏi size 1m4 -> bổ sung giá bông ép 140x190cm trước, rồi xin SĐT để Sale xác nhận.

@@ -5,6 +5,7 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'demxanh.com',
   'cdn.hstatic.net',
   'product.hstatic.net',
+  'media.loveitopcdn.com',
 ]);
 
 export function proxiedImageUrl(publicBaseUrl, sourceUrl) {

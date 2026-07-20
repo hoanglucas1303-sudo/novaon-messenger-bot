@@ -50,6 +50,8 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Product catalog test data — CODE IMPLEMENTED (2026-07-20).** Đã enrich campaign Sông Hồng fallback bằng giá tham khảo/biến thể và ảnh public từ nguồn online (`demxanh.com`, `songhonghanoi.vn`, `songhongonline.vn`). Ảnh đi qua proxy `/assets/remote-image` với allowlist domain. Dữ liệu phục vụ test flow hỏi giá/ảnh, chưa phải nguồn giá chính thức để bán thật.
 
+**Seed data test case lớn — CODE IMPLEMENTED (2026-07-20).** Đã thêm bộ tài liệu seed tại `public/seed/song-hong-large-test/` và route public `/seed/song-hong-large-test/README.md`. Import Center có panel “Seed tài liệu test” để điền nhanh URL import cho project brief, catalog ban đầu, FAQ/chính sách, sales playbook, update giá/thêm sản phẩm và test prompts.
+
 **Import Center — CODE IMPLEMENTED (2026-07-20), MVP.** Đã thêm `/studio/import` và `/studio/import/demo` (public demo). Luồng: paste text hoặc URL website → AI extractor dùng premium model → draft `products/knowledge/rules/recommendationRules` → PM review → publish merge vào campaign. Nếu thiếu OpenRouter key thì có heuristic fallback. Draft hiện lưu RAM; bước tiếp theo là lưu `import_drafts` vào Postgres và thêm upload PDF/Excel.
 
 **Unified Dashboard — CODE IMPLEMENTED (2026-07-20).** Đã thêm `/dashboard` và `/dashboard/demo` (public demo). Gom quản lý dự án/campaign, nút bật chat demo, update knowledge nhanh, import tài liệu và lead gần nhất vào một màn. Các route `/studio`, `/studio/import`, `/leads` vẫn là màn chuyên sâu.
@@ -69,6 +71,7 @@ src/media.js       proxy ảnh public qua /assets/remote-image với allowlist d
 src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sửa)
 src/config.js      đọc env
 public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders.mjs)
+public/seed/song-hong-large-test/ Bộ seed tài liệu Sông Hồng để tạo campaign/import/update/test prompt
 ```
 
 ## Hạ tầng đã dựng (identifiers)
@@ -105,4 +108,5 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Campaign model:** campaign chứa persona, rules, knowledge, products, page_ids, active. Core LLM dùng campaign; Messenger/Web Chat chỉ là adapter.
 - **Giá/ảnh sản phẩm:** catalog hiện có `variants`, `priceNote`, `sourceUrl`, `images`. Bot được phép báo giá tham khảo trong catalog nhưng không cam kết khuyến mại/chốt giá thay Sale.
 - **Import Center:** MVP nhận text/URL, chưa upload file nhị phân. Dữ liệu giá/sản phẩm extract phải qua human review trước khi publish.
+- **Seed data:** `/studio/import` có panel seed. Dùng `02-initial-catalog-products.txt` để tạo catalog lớn, rồi import `05-update-price-and-new-products.txt` để test cập nhật giá/thêm sản phẩm.
 - Persona/luật/catalog nằm trong `src/knowledge.js` (Kiểu A). Luật cấm markdown (Messenger hiện `*` thô).
