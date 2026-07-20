@@ -84,7 +84,7 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Dashboard leads:** cần set `DASHBOARD_PASSWORD` (và tuỳ chọn `DASHBOARD_USER`, mặc định `novaon`) trước khi mở `/leads`.
 - **Campaign Builder:** `/studio` dùng cùng `DASHBOARD_PASSWORD`; `/studio/demo` và `/chat/song-hong-demo` xem được UI/test web channel nhanh.
 - **Campaign DB:** bảng `campaigns` tự tạo khi có `DATABASE_URL`. Chưa có DB thì chỉ dùng fallback RAM, không bền sau redeploy.
-- **LLM cost strategy:** code default mới là `LLM_MODEL=anthropic/claude-haiku-4.5`, `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6`, `LLM_MAX_TOKENS=350`. Web chat test được `?model=haiku|sonnet|auto`. Railway hiện có thể vẫn đang override `LLM_MODEL=anthropic/claude-sonnet-4.6`, cần đổi env để tiết kiệm thật.
+- **LLM cost strategy:** code default mới là `CHEAP_LLM_MODEL=anthropic/claude-haiku-4.5`, `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6`, `LLM_MAX_TOKENS=350`. Web chat test được `?model=haiku|sonnet|auto`. Biến `LLM_MODEL` cũ nếu còn trên Railway chỉ được dùng làm premium fallback, không còn ép default route sang Sonnet.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
 ## Ghi chú kỹ thuật

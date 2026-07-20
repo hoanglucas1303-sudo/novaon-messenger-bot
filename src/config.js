@@ -9,8 +9,11 @@ export const config = {
 
   // LLM (Phase 1+)
   openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
-  llmModel: process.env.LLM_MODEL || 'anthropic/claude-haiku-4.5',
-  premiumLlmModel: process.env.PREMIUM_LLM_MODEL || 'anthropic/claude-sonnet-4.6',
+  llmModel: process.env.CHEAP_LLM_MODEL || 'anthropic/claude-haiku-4.5',
+  premiumLlmModel:
+    process.env.PREMIUM_LLM_MODEL ||
+    process.env.LLM_MODEL ||
+    'anthropic/claude-sonnet-4.6',
   llmMaxTokens: Number(process.env.LLM_MAX_TOKENS || 350),
 
   // URL gốc công khai (để dựng link ảnh tự host cho Messenger fetch)
