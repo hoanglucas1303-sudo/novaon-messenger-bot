@@ -16,6 +16,10 @@ npm run dev            # cổng 3010
 - `POST /webhook` — nhận sự kiện tin nhắn
 - `GET /leads` — mini dashboard xem lead, cần `DASHBOARD_PASSWORD`
 - `GET /leads/demo` — dashboard demo bằng dữ liệu mẫu, không hiển thị lead thật
+- `GET /studio` — Campaign Builder thật, cần `DASHBOARD_PASSWORD`
+- `GET /studio/demo` — xem GUI Campaign Builder bằng campaign mẫu
+- `GET /chat/:campaignSlug` — web chat test full flow, ví dụ `/chat/song-hong-demo`
+- `POST /api/chat` — API chat cho website/LDP
 
 ## Nối Facebook Messenger (Phase 0)
 
@@ -58,3 +62,25 @@ Triển khai trên Railway:
 Test nhanh trên Messenger: nhắn nhu cầu mua và để lại SĐT, ví dụ “Mình quan tâm đệm bông ép 1m6, gọi mình số 09xxxxxxxx”. Nếu AI phát lead đúng, dashboard sẽ có bản ghi mới.
 
 Xem thử UI khi chưa cấu hình DB/password: mở `/leads/demo`. Đây chỉ là dữ liệu mẫu đã che SĐT, không phải lead thật.
+
+## Campaign Builder + Web Chat
+
+Campaign là "brain" dùng chung cho nhiều channel. Messenger chỉ là adapter đầu tiên; web chat/LDP dùng cùng persona, luật, tài liệu và catalog.
+
+Mỗi campaign có:
+
+- Tên, slug public và brand/client
+- Page ID Messenger để backend map webhook vào đúng campaign
+- Persona chatbot
+- Luật trả lời
+- Tài liệu/hướng dẫn thêm
+- Catalog sản phẩm JSON, gồm cả URL ảnh
+- Trạng thái active/inactive
+
+Route chính:
+
+- `/studio/demo` — xem Campaign Builder ngay, không lưu thay đổi
+- `/studio` — tạo/sửa campaign thật, cần `DASHBOARD_PASSWORD`
+- `/chat/song-hong-demo` — web chat test campaign Sông Hồng
+
+Khi có Postgres, campaign được lưu vào bảng `campaigns`. Nếu chưa có `DATABASE_URL`, app dùng campaign Sông Hồng trong bộ nhớ để vẫn test được web chat; dữ liệu tạo mới không bền sau redeploy.

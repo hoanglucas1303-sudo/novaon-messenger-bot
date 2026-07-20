@@ -1,4 +1,5 @@
 import { config } from './config.js';
+import { requireAdminAuth } from './auth.js';
 import { getLead, hasDatabase, listLeads, updateLeadStatus } from './db.js';
 
 export function mountDashboard(app) {
@@ -23,21 +24,21 @@ export function mountDashboard(app) {
     );
   });
 
-  app.get('/leads', requireDashboardAuth, route(async (req, res) => {
+  app.get('/leads', requireAdminAuth, route(async (req, res) => {
     if (!ensureDashboardReady(res)) return;
     const status = typeof req.query.status === 'string' ? req.query.status : 'all';
     const leads = await listLeads({ status });
     res.type('html').send(renderPage({ title: 'Leads', body: renderLeadList(leads, status) }));
   }));
 
-  app.get('/leads/:id', requireDashboardAuth, route(async (req, res) => {
+  app.get('/leads/:id', requireAdminAuth, route(async (req, res) => {
     if (!ensureDashboardReady(res)) return;
     const lead = await getLead(req.params.id);
     if (!lead) return res.status(404).type('html').send(renderPage({ title: 'Không tìm thấy lead', body: '<p>Lead không tồn tại.</p>' }));
     res.type('html').send(renderPage({ title: `Lead #${lead.id}`, body: renderLeadDetail(lead) }));
   }));
 
-  app.post('/leads/:id/status', requireDashboardAuth, route(async (req, res) => {
+  app.post('/leads/:id/status', requireAdminAuth, route(async (req, res) => {
     if (!ensureDashboardReady(res)) return;
     try {
       await updateLeadStatus(req.params.id, req.body.status);
@@ -108,23 +109,6 @@ function route(handler) {
   return (req, res, next) => {
     Promise.resolve(handler(req, res, next)).catch(next);
   };
-}
-
-function requireDashboardAuth(req, res, next) {
-  if (!config.dashboardPassword) return next();
-
-  const header = req.headers.authorization || '';
-  const [scheme, encoded] = header.split(' ');
-  if (scheme !== 'Basic' || !encoded) return requestAuth(res);
-
-  const [user, password] = Buffer.from(encoded, 'base64').toString('utf8').split(':');
-  if (user === config.dashboardUser && password === config.dashboardPassword) return next();
-  return requestAuth(res);
-}
-
-function requestAuth(res) {
-  res.set('WWW-Authenticate', 'Basic realm="Novaon Leads"');
-  return res.status(401).send('Authentication required');
 }
 
 function ensureDashboardReady(res) {

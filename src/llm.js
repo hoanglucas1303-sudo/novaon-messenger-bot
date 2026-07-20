@@ -1,11 +1,12 @@
 import { config } from './config.js';
 import { brand, products } from './knowledge.js';
+import { campaignToPromptData, defaultCampaign } from './campaigns.js';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Ghép catalog thành text gọn cho system prompt
-function renderCatalog() {
-  return products
+function renderCatalog(catalogProducts) {
+  return catalogProducts
     .map((p, i) => {
       const hasImg = p.images?.length ? ` — có ${p.images.length} ảnh` : ' — chưa có ảnh';
       const lines = [
@@ -22,15 +23,24 @@ function renderCatalog() {
 }
 
 // Dựng system prompt từ persona + luật + catalog (Kiểu A)
-function buildSystemPrompt() {
-  const rules = brand.rules.map((r, i) => `${i + 1}. ${r}`).join('\n');
-  return `${brand.persona}
+function buildSystemPrompt(campaign) {
+  const promptData = campaignToPromptData(campaign || defaultCampaign());
+  const rules = promptData.rulesList.map((r, i) => `${i + 1}. ${r}`).join('\n');
+  const knowledge = promptData.knowledge
+    ? `
+# TÀI LIỆU / HƯỚNG DẪN THÊM
+${promptData.knowledge}
+`
+    : '';
+
+  return `${promptData.persona}
 
 # LUẬT TRẢ LỜI (bắt buộc tuân thủ)
 ${rules}
+${knowledge}
 
 # DANH MỤC SẢN PHẨM (chỉ được dùng thông tin trong đây, không bịa thêm)
-${renderCatalog()}
+${renderCatalog(promptData.products)}
 
 # GỬI ẢNH CHO KHÁCH
 Khi khách muốn XEM ẢNH một sản phẩm (ví dụ "cho xem ảnh", "mẫu nào đẹp", "hình thực tế"...),
@@ -54,13 +64,13 @@ KHÔNG nhắc tới "##LEAD" hay việc lưu bằng cú pháp trong lời thoạ
 const IMG_MARKER = /^##IMG:\s*([a-z0-9\-,\s]+)$/im;
 const LEAD_MARKER = /^##LEAD:\s*(\{.*\})$/im;
 
-export function parseReplyMarkers(reply) {
+export function parseReplyMarkers(reply, catalogProducts = products) {
   const { text: withoutLead, lead } = extractLead(reply);
-  const { text, images } = extractImages(withoutLead);
+  const { text, images } = extractImages(withoutLead, catalogProducts);
   return { text, images, lead };
 }
 
-function extractImages(reply) {
+function extractImages(reply, catalogProducts) {
   const m = reply.match(IMG_MARKER);
   const text = reply.replace(IMG_MARKER, '').trim();
   if (!m) return { text, images: [] };
@@ -71,7 +81,7 @@ function extractImages(reply) {
     .filter(Boolean);
   const images = [];
   for (const id of ids) {
-    const p = products.find((x) => x.id === id);
+    const p = catalogProducts.find((x) => x.id === id);
     if (p?.images?.length) images.push(...p.images);
   }
   return { text, images };
@@ -95,25 +105,28 @@ function extractLead(reply) {
 const histories = new Map();
 const MAX_TURNS = 8; // giữ tối đa 8 lượt (4 cặp hỏi–đáp)
 
-function getHistory(senderId) {
-  if (!histories.has(senderId)) histories.set(senderId, []);
-  return histories.get(senderId);
+function getHistory(conversationKey) {
+  if (!histories.has(conversationKey)) histories.set(conversationKey, []);
+  return histories.get(conversationKey);
 }
 
 /**
  * Sinh câu trả lời cho 1 tin nhắn của khách.
  * @returns {Promise<{text: string, images: string[], lead: object | null, conversation: object[]}>}
  */
-export async function generateReply(senderId, userText) {
+export async function generateReply(senderId, userText, options = {}) {
+  const campaign = campaignToPromptData(options.campaign || defaultCampaign());
+  const conversationKey = options.conversationKey || `${campaign.slug}:${senderId}`;
+
   if (!config.openrouterApiKey) {
     console.warn('[llm] Thiếu OPENROUTER_API_KEY — trả lời tạm.');
     return { text: brand.fallback, images: [], lead: null, conversation: [] };
   }
 
-  const history = getHistory(senderId);
+  const history = getHistory(conversationKey);
   history.push({ role: 'user', content: userText });
 
-  const messages = [{ role: 'system', content: buildSystemPrompt() }, ...history];
+  const messages = [{ role: 'system', content: buildSystemPrompt(campaign) }, ...history];
 
   try {
     const res = await fetch(OPENROUTER_URL, {
@@ -144,7 +157,7 @@ export async function generateReply(senderId, userText) {
       return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
     }
 
-    const { text, images, lead } = parseReplyMarkers(raw);
+    const { text, images, lead } = parseReplyMarkers(raw, campaign.products);
     // Lưu lịch sử bản đã gỡ dấu nội bộ cho sạch
     const cleanText = text || 'Dạ em gửi anh/chị xem ảnh ạ 😊';
     history.push({ role: 'assistant', content: cleanText });

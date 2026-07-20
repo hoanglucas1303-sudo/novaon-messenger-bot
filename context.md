@@ -25,6 +25,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 - [x] **Phase 1 — Trả lời bằng AI (A):** knowledge (persona+luật+catalog Sông Hồng) → LLM (OpenRouter). ✅ VERIFIED 2026-07-20.
 - [x] **Phase 2 — Gửi ảnh:** LLM chèn dấu `##IMG:<id>` → backend gửi ảnh sản phẩm. ✅ VERIFIED 2026-07-20 (ảnh hiện thật trên Messenger).
 - [ ] **➡️ ĐANG LÀM — Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** Code đã implement 2026-07-20; chờ gắn Railway Postgres + `DASHBOARD_PASSWORD` rồi test thật trên Messenger để verify.
+- [ ] **➡️ ĐANG MỞ RỘNG — Platform foundation: Campaign Builder + Web Chat Test.** Code đã implement 2026-07-20: `/studio`, `/studio/demo`, `/chat/:slug`, `/api/chat`, campaign store DB/fallback. Mục tiêu: tạo campaign, nạp hướng dẫn chatbot, test full flow trên web FE và Messenger.
 - [ ] **Phase 3 — RAG thật:** pgvector + tìm kiếm ngữ nghĩa (brainstorm thêm).
 - [ ] **Phase 4 — Dashboard quản trị data:** persona/luật/catalog/ảnh (chuyển knowledge.js → DB) + xem lead + multi-tenant.
 - [ ] **Phase 5 — Go-live:** Meta App Review + Business Verification (~1-2 tuần chờ Meta) + (tùy chọn) Handover Protocol (live-takeover).
@@ -45,13 +46,17 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, mini dashboard thật `/leads`, và dashboard demo `/leads/demo` bằng dữ liệu mẫu đã che SĐT. Cần set `DATABASE_URL` + `DASHBOARD_PASSWORD` trên Railway rồi test lead thật bằng Messenger.
 
+**Platform foundation — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Campaign Builder `/studio` (cần `DASHBOARD_PASSWORD`), GUI demo `/studio/demo`, web chat public `/chat/song-hong-demo`, API `/api/chat`. Campaign là brain dùng chung cho Messenger + Web Chat. Messenger map campaign bằng Page ID (`event.recipient.id`). Nếu chưa có DB, app dùng campaign Sông Hồng fallback trong RAM; dùng thật cần Railway Postgres.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh
 src/messenger.js   Send API: sendText / sendImage / sendImages / sendTypingOn
-src/llm.js         gọi OpenRouter, build system prompt, lịch sử RAM, parse ##IMG + ##LEAD
+src/llm.js         gọi OpenRouter, build system prompt theo campaign, lịch sử RAM, parse ##IMG + ##LEAD
 src/db.js          Postgres helper + tự tạo bảng leads + CRUD trạng thái
+src/campaigns.js   campaign store DB/fallback + default campaign Sông Hồng
 src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái; /leads/demo để xem UI bằng dữ liệu mẫu
+src/studio.js      Campaign Builder /studio + web chat /chat/:slug + API /api/chat
 src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sửa)
 src/config.js      đọc env
 public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders.mjs)
@@ -74,6 +79,8 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **APP_SECRET:** set sau để bật verify chữ ký webhook (hardening).
 - **Railway Postgres:** cần gắn DB vào service để có `DATABASE_URL`, rồi deploy lại.
 - **Dashboard leads:** cần set `DASHBOARD_PASSWORD` (và tuỳ chọn `DASHBOARD_USER`, mặc định `novaon`) trước khi mở `/leads`.
+- **Campaign Builder:** `/studio` dùng cùng `DASHBOARD_PASSWORD`; `/studio/demo` và `/chat/song-hong-demo` xem được UI/test web channel nhanh.
+- **Campaign DB:** bảng `campaigns` tự tạo khi có `DATABASE_URL`. Chưa có DB thì chỉ dùng fallback RAM, không bền sau redeploy.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
 ## Ghi chú kỹ thuật
@@ -85,4 +92,5 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Gửi ảnh:** Facebook Send API KHÔNG fetch được ảnh từ `placehold.co` (lỗi #100 subcode 2018007 "không tải lên được"). → **PHẢI tự host ảnh** trên domain backend (`/assets/products/*.png`, phục vụ qua `express.static('public')`). Facebook fetch domain Railway của mình OK (cùng chỗ webhook). Ảnh placeholder sinh bằng `scripts/gen-placeholders.mjs`.
 - **LLM quyết gửi ảnh** bằng cách chèn dòng `##IMG: <id>` ở cuối (llm.js parse + gỡ khỏi text). Đơn giản, chưa cần tool-calling.
 - **LLM ghi nhận lead** bằng cách chèn dòng `##LEAD: {"customerName":"...","phone":"...","productInterest":"...","note":"..."}` ở cuối khi đã có SĐT. Backend parse + gỡ khỏi text + lưu bảng `leads`; nếu chưa có `DATABASE_URL` thì chỉ log.
+- **Campaign model:** campaign chứa persona, rules, knowledge, products, page_ids, active. Core LLM dùng campaign; Messenger/Web Chat chỉ là adapter.
 - Persona/luật/catalog nằm trong `src/knowledge.js` (Kiểu A). Luật cấm markdown (Messenger hiện `*` thô).

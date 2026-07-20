@@ -4,7 +4,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, warnMissingConfig } from './config.js';
 import { createLead, initDatabase } from './db.js';
+import { findCampaignByPageId, initCampaignStore } from './campaigns.js';
 import { mountDashboard } from './dashboard.js';
+import { mountStudio } from './studio.js';
 import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
 
@@ -28,10 +30,11 @@ app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)
 app.get('/', (_req, res) => {
-  res.send('Novaon Messenger Bot ✅ (Phase v1 — AI + ảnh + lead capture). Webhook tại /webhook, dashboard tại /leads');
+  res.send('Novaon Bot Platform ✅ Webhook: /webhook · Leads: /leads · Studio: /studio · Web test: /chat/song-hong-demo');
 });
 
 mountDashboard(app);
+mountStudio(app);
 
 // --- Xác minh webhook (Meta gọi 1 lần khi cấu hình) ---
 app.get('/webhook', (req, res) => {
@@ -75,15 +78,22 @@ async function handleEvent(event) {
   // Phase 1+2: trả lời bằng AI (persona + luật + knowledge) và gửi ảnh khi cần.
   if (event.message?.text) {
     const text = event.message.text;
+    const pageId = event.recipient?.id;
+    const campaign = await findCampaignByPageId(pageId);
     console.log(`[msg] ${senderId}: ${text}`);
     await sendTypingOn(senderId);
-    const { text: reply, images, lead, conversation } = await generateReply(senderId, text);
+    const { text: reply, images, lead, conversation } = await generateReply(senderId, text, {
+      campaign,
+      conversationKey: `messenger:${campaign.slug}:${senderId}`,
+    });
     await sendText(senderId, reply);
     if (images.length) await sendImages(senderId, images);
     if (lead) {
       const savedLead = await createLead({
-        pageId: event.recipient?.id,
+        campaignId: campaign.slug,
+        pageId,
         senderId,
+        channel: 'messenger',
         lead,
         conversation,
       });
@@ -114,8 +124,9 @@ function verifySignature(req) {
 
 try {
   await initDatabase();
+  await initCampaignStore();
 } catch (e) {
-  console.error('[db] Không khởi tạo được DB:', e);
+  console.error('[boot] Không khởi tạo được DB/campaign store:', e);
 }
 
 export const server = app.listen(config.port, () => {

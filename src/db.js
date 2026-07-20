@@ -16,6 +16,16 @@ function getPool() {
   return pool;
 }
 
+export function getDatabase() {
+  return getPool();
+}
+
+export async function query(sql, params = []) {
+  const db = getPool();
+  if (!db) return null;
+  return db.query(sql, params);
+}
+
 export function hasDatabase() {
   return Boolean(config.databaseUrl);
 }
@@ -28,6 +38,7 @@ export async function initDatabase() {
     CREATE TABLE IF NOT EXISTS leads (
       id BIGSERIAL PRIMARY KEY,
       tenant_id TEXT NOT NULL DEFAULT 'song-hong',
+      campaign_id TEXT,
       page_id TEXT,
       sender_id TEXT NOT NULL,
       customer_name TEXT,
@@ -45,10 +56,17 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS leads_status_idx ON leads (status);
     CREATE INDEX IF NOT EXISTS leads_sender_id_idx ON leads (sender_id);
   `);
+
+  await db.query(`
+    ALTER TABLE leads ADD COLUMN IF NOT EXISTS campaign_id TEXT;
+    ALTER TABLE leads ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT 'messenger';
+    CREATE INDEX IF NOT EXISTS leads_campaign_id_idx ON leads (campaign_id);
+    CREATE INDEX IF NOT EXISTS leads_channel_idx ON leads (channel);
+  `);
   console.log('[db] Bảng leads sẵn sàng ✅');
 }
 
-export async function createLead({ pageId, senderId, lead, conversation }) {
+export async function createLead({ campaignId, pageId, senderId, channel = 'messenger', lead, conversation }) {
   const normalized = normalizeLead(lead);
   if (!normalized.phone) {
     console.warn('[lead] Bỏ qua lead vì thiếu số điện thoại:', lead);
@@ -64,20 +82,24 @@ export async function createLead({ pageId, senderId, lead, conversation }) {
   const result = await db.query(
     `
       INSERT INTO leads (
+        campaign_id,
         page_id,
         sender_id,
+        channel,
         customer_name,
         phone,
         product_interest,
         note,
         conversation
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
       RETURNING *
     `,
     [
+      campaignId || null,
       pageId || null,
       senderId,
+      channel,
       normalized.customerName || null,
       normalized.phone,
       normalized.productInterest || null,
