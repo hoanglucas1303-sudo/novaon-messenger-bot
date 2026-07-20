@@ -20,8 +20,8 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 ## Lộ trình (phase — dừng review từng bước)
 
 - [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express. ✅ VERIFIED 2026-07-20 (echo chạy thật trên page Nobo AI).
-- [ ] **Phase 1 — Trả lời bằng AI (A):** knowledge đơn giản + persona/luật → LLM soạn câu trả lời.
-- [ ] **Phase 2 — Gửi ảnh:** gắn ảnh vào sản phẩm, LLM tự quyết gửi.
+- [x] **Phase 1 — Trả lời bằng AI (A):** knowledge (persona+luật+catalog Sông Hồng) → LLM (OpenRouter). ✅ VERIFIED 2026-07-20.
+- [x] **Phase 2 — Gửi ảnh:** LLM chèn dấu `##IMG:<id>` → backend gửi ảnh sản phẩm. ✅ VERIFIED 2026-07-20 (ảnh hiện thật trên Messenger).
 - [ ] **Phase 3 — RAG thật:** pgvector + tìm kiếm ngữ nghĩa (brainstorm thêm).
 - [ ] **Phase 4 — Admin cho human:** trang cấu hình persona/luật/sản phẩm/ảnh. Multi-tenant.
 - [ ] **Phase 5 — Go-live:** Meta App Review + (tùy chọn) human takeover.
@@ -60,3 +60,6 @@ src/config.js      đọc env
 - Webhook phải trả `200` nhanh, xử lý sự kiện bất đồng bộ (Meta retry nếu chậm).
 - Verify chữ ký `X-Hub-Signature-256` bằng `APP_SECRET` (đã có, bỏ qua nếu chưa đặt secret).
 - Development mode: chỉ tài khoản có vai trò trong App (admin/dev/tester) mới nhắn thử được.
+- **Gửi ảnh:** Facebook Send API KHÔNG fetch được ảnh từ `placehold.co` (lỗi #100 subcode 2018007 "không tải lên được"). → **PHẢI tự host ảnh** trên domain backend (`/assets/products/*.png`, phục vụ qua `express.static('public')`). Facebook fetch domain Railway của mình OK (cùng chỗ webhook). Ảnh placeholder sinh bằng `scripts/gen-placeholders.mjs`.
+- **LLM quyết gửi ảnh** bằng cách chèn dòng `##IMG: <id>` ở cuối (llm.js parse + gỡ khỏi text). Đơn giản, chưa cần tool-calling.
+- Persona/luật/catalog nằm trong `src/knowledge.js` (Kiểu A). Luật cấm markdown (Messenger hiện `*` thô).
