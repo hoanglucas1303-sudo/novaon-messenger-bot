@@ -121,19 +121,33 @@ function renderDashboard({ title, campaigns, selected, leads, demo, dbReady, sav
   return renderPage({
     title,
     body: `
+      <nav class="app-nav">
+        <a class="brand-mark" href="/dashboard">
+          <span>NB</span>
+          Novaon Bot Platform
+        </a>
+        <div class="nav-links">
+          <a href="#projects">Dự án</a>
+          <a href="#knowledge">Knowledge</a>
+          <a href="#leads">Lead</a>
+          <a href="/studio/import${demo ? '/demo' : ''}">Import</a>
+        </div>
+      </nav>
       <header class="hero">
         <div>
-          <p class="eyebrow">Novaon Bot Platform${demo ? ' Demo' : ''}</p>
+          <p class="eyebrow">Operations Dashboard${demo ? ' · Demo mode' : ''}</p>
           <h1>Dashboard vận hành chatbot</h1>
-          <p>Quản lý dự án, bật chat demo, cập nhật knowledge, import tài liệu và theo dõi lead trong một màn.</p>
+          <p>Thiết lập dự án, nạp tài liệu, test flow tư vấn và theo dõi lead trong một màn đủ rõ để người mới cũng biết bước tiếp theo.</p>
         </div>
         <div class="hero-actions">
-          <a class="button secondary" href="/studio/import${demo ? '/demo' : ''}">Import tài liệu</a>
-          <a class="button" href="/studio/campaigns/new">Tạo dự án</a>
+          <a class="button secondary" href="/studio/import${demo ? '/demo' : ''}">Nạp tài liệu</a>
+          <a class="button" href="/studio/campaigns/new">Tạo dự án mới</a>
         </div>
       </header>
 
       ${saved ? '<p class="notice">Đã cập nhật knowledge cho campaign.</p>' : ''}
+
+      ${renderWorkflow(selected, demo, dbReady)}
 
       <section class="stats">
         ${statCard('Dự án', campaigns.length)}
@@ -250,6 +264,38 @@ function renderKnowledgePanel(campaign, demo) {
   `;
 }
 
+function renderWorkflow(campaign, demo, dbReady) {
+  const chatHref = campaign ? `/chat/${campaign.slug}?model=auto` : '/chat/song-hong-demo?model=auto';
+  return `
+    <section class="workflow">
+      <article>
+        <span class="step">1</span>
+        <h3>Tạo hoặc chọn dự án</h3>
+        <p>Campaign là bộ não dùng chung cho Messenger, web chat và LDP.</p>
+        <a href="/studio">Mở Campaign Builder</a>
+      </article>
+      <article>
+        <span class="step">2</span>
+        <h3>Nạp knowledge</h3>
+        <p>Dùng Import Center để convert tài liệu, bảng giá, FAQ thành draft data.</p>
+        <a href="/studio/import${demo ? '/demo' : ''}?seed=initial-catalog">Dùng seed Sông Hồng</a>
+      </article>
+      <article>
+        <span class="step">3</span>
+        <h3>Test tư vấn</h3>
+        <p>Chạy web chat để kiểm tra trả lời, gợi ý sản phẩm, ảnh và lead capture.</p>
+        <a href="${chatHref}" target="_blank" rel="noreferrer">Bật chat demo</a>
+      </article>
+      <article>
+        <span class="step">4</span>
+        <h3>Theo dõi lead</h3>
+        <p>${dbReady || demo ? 'Lead mới sẽ hiện ở đây để Sale tiếp nối.' : 'Gắn Railway Postgres để lưu lead thật.'}</p>
+        <a href="${demo ? '/leads/demo' : '/leads'}">Mở lead board</a>
+      </article>
+    </section>
+  `;
+}
+
 function renderLeadTable(leads, { demo, dbReady }) {
   if (!demo && !dbReady) {
     return `
@@ -316,56 +362,91 @@ function renderPage({ title, body }) {
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4f6f8;
+        --bg: #f5f6f8;
         --surface: #ffffff;
-        --text: #17202a;
-        --muted: #667085;
-        --line: #d7dde5;
-        --brand: #0f766e;
-        --brand-dark: #115e59;
-        --soft: #e6f4f1;
+        --text: #111318;
+        --muted: #626873;
+        --line: #e2e6ec;
+        --brand: #ff5a0a;
+        --brand-dark: #d9480f;
+        --ink: #070707;
+        --teal: #0f766e;
+        --soft: #fff1e8;
+        --teal-soft: #e6f4f1;
       }
       * { box-sizing: border-box; }
       body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; line-height: 1.5; }
-      main { width: min(1240px, calc(100% - 32px)); margin: 28px auto 56px; }
+      main { width: min(1180px, calc(100% - 32px)); margin: 20px auto 56px; }
       h1, h2, h3, p { margin: 0; }
-      h1 { font-size: 30px; line-height: 1.2; }
-      h2 { font-size: 20px; }
+      h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; max-width: 760px; }
+      h2 { font-size: 22px; }
       h3 { font-size: 16px; }
       a { color: var(--brand-dark); font-weight: 700; text-decoration: none; }
       code { background: #eef2f6; border-radius: 4px; padding: 2px 5px; }
+      .app-nav { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+      .brand-mark { display: inline-flex; align-items: center; gap: 10px; color: var(--text); }
+      .brand-mark span { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 13px; }
+      .nav-links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+      .nav-links a { color: var(--muted); }
       .hero, section, .stat, .empty { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
-      .hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; padding: 22px; margin-bottom: 16px; }
-      .hero p { color: var(--muted); margin-top: 6px; max-width: 760px; }
-      .eyebrow { color: var(--brand-dark) !important; font-weight: 700; margin-bottom: 6px; }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 24px;
+        min-height: 300px;
+        padding: 38px;
+        margin-bottom: 16px;
+        color: #fff;
+        background:
+          radial-gradient(70% 70% at 76% 120%, rgb(255 90 10 / .75), transparent 58%),
+          linear-gradient(135deg, #070707 0%, #111318 58%, #201008 100%);
+        border-color: #15171c;
+      }
+      .hero p { color: #d8dde6; margin-top: 12px; max-width: 720px; font-size: 17px; }
+      .eyebrow { color: #ffb088 !important; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; font-size: 12px; letter-spacing: .08em; }
       .hero-actions, .row-actions, .section-head, .form-head { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
       .section-head, .form-head { justify-content: space-between; margin-bottom: 14px; }
       .section-head p, .form-head p, .muted, td span { color: var(--muted); }
-      .button, button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border: 1px solid var(--brand); border-radius: 6px; background: var(--brand); color: #fff; padding: 9px 14px; font: inherit; font-weight: 700; cursor: pointer; }
-      .button.secondary { background: var(--surface); color: var(--brand-dark); border-color: var(--line); }
+      .button, button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border: 1px solid var(--brand); border-radius: 8px; background: var(--brand); color: #fff; padding: 10px 14px; font: inherit; font-weight: 800; cursor: pointer; }
+      .button.secondary { background: var(--surface); color: var(--text); border-color: var(--line); }
+      .hero .button.secondary { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .25); }
       .button.small { min-height: 32px; padding: 6px 9px; font-size: 13px; }
-      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; background: transparent; border: 0; margin-bottom: 16px; }
-      .stat { padding: 16px; }
+      .workflow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; background: transparent; border: 0; padding: 0; margin-bottom: 16px; }
+      .workflow article { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+      .workflow h3 { margin: 12px 0 6px; }
+      .workflow p { color: var(--muted); min-height: 64px; }
+      .workflow a { display: inline-block; margin-top: 12px; }
+      .step { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 800; }
+      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: var(--brand); border: 0; margin-bottom: 16px; overflow: hidden; }
+      .stat { padding: 18px; background: transparent; border: 0; border-right: 1px solid rgb(255 255 255 / .25); color: #fff; }
+      .stat:last-child { border-right: 0; }
       .stat strong { display: block; font-size: 28px; line-height: 1; margin-bottom: 6px; }
-      .stat span { color: var(--muted); font-weight: 700; }
-      section { padding: 18px; margin-bottom: 16px; }
+      .stat span { color: rgb(255 255 255 / .82); font-weight: 800; }
+      section { padding: 20px; margin-bottom: 16px; }
       table { width: 100%; border-collapse: collapse; overflow: hidden; }
       th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
       th { color: var(--muted); font-size: 13px; }
       tr:last-child td { border-bottom: 0; }
       tr.selected td { background: #f8fbfb; }
       .pill { display: inline-flex; border-radius: 999px; padding: 3px 10px; background: #f2f4f7; color: #344054; font-size: 13px; font-weight: 700; }
-      .pill.active { background: var(--soft); color: var(--brand-dark); }
+      .pill.active { background: var(--teal-soft); color: var(--teal); }
       .knowledge-form { display: grid; gap: 14px; }
       label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 700; }
       textarea { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; color: var(--text); font: inherit; resize: vertical; }
-      .notice { background: var(--soft); color: var(--brand-dark); border: 1px solid #a7d8d0; border-radius: 6px; padding: 10px 12px; margin-bottom: 16px; font-weight: 700; }
+      .notice { background: var(--soft); color: var(--brand-dark); border: 1px solid #ffd1b8; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-weight: 800; }
       .empty { padding: 18px; }
       .empty p { color: var(--muted); margin-top: 6px; }
       @media (max-width: 860px) {
         main { width: min(100% - 20px, 1240px); margin-top: 20px; }
-        .hero, .section-head, .form-head { flex-direction: column; align-items: flex-start; }
+        .app-nav { height: auto; align-items: flex-start; flex-direction: column; margin-bottom: 14px; }
+        .hero { grid-template-columns: 1fr; min-height: auto; padding: 24px; }
+        .section-head, .form-head { flex-direction: column; align-items: flex-start; }
+        .workflow { grid-template-columns: 1fr; }
         .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .stat:nth-child(2) { border-right: 0; }
         table { display: block; overflow-x: auto; }
       }
     </style>

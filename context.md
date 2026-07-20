@@ -56,6 +56,8 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Unified Dashboard — CODE IMPLEMENTED (2026-07-20).** Đã thêm `/dashboard` và `/dashboard/demo` (public demo). Gom quản lý dự án/campaign, nút bật chat demo, update knowledge nhanh, import tài liệu và lead gần nhất vào một màn. Các route `/studio`, `/studio/import`, `/leads` vẫn là màn chuyên sâu.
 
+**UI polish pass — CODE IMPLEMENTED (2026-07-20).** Đã nâng UI cho `/dashboard`, `/studio`, `/studio/import` và `/chat/:slug`: nav rõ hơn, hero tối có CTA, các bước vận hành 1-2-3-4, seed/import pipeline, form helper text và prompt test nhanh trong web chat.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh

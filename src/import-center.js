@@ -481,13 +481,28 @@ function renderImportForm({ campaigns, action, sourceText, sourceType = 'text', 
     .map((campaign) => `<option value="${escapeHtml(campaign.slug)}">${escapeHtml(campaign.name)} (${escapeHtml(campaign.slug)})</option>`)
     .join('');
   return `
+    <nav class="app-nav">
+      <a class="brand-mark" href="/dashboard"><span>AI</span> Import Center</a>
+      <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/studio">Studio</a>
+        <a href="/chat/song-hong-demo?model=auto" target="_blank" rel="noreferrer">Chat demo</a>
+      </div>
+    </nav>
     <header class="topbar">
       <div>
-        <a class="back" href="/studio">Studio</a>
+        <p class="eyebrow">Knowledge Pipeline${demo ? ' · Demo' : ''}</p>
         <h1>${demo ? 'Import Center Demo' : 'Import Center'}</h1>
-        <p>Convert tài liệu client thành draft catalog, knowledge, rules và gợi ý tư vấn để PM review.</p>
+        <p>Chuyển tài liệu client thành draft catalog, knowledge, rules và gợi ý tư vấn để PM review trước khi publish.</p>
       </div>
+      <a class="button secondary" href="/seed/song-hong-large-test/README.md" target="_blank" rel="noreferrer">Mở bộ seed</a>
     </header>
+    <section class="process">
+      <article><span>1</span><strong>Chọn nguồn</strong><p>Paste text hoặc dùng URL seed/website.</p></article>
+      <article><span>2</span><strong>AI tạo draft</strong><p>Trích sản phẩm, giá, ảnh, FAQ và rules.</p></article>
+      <article><span>3</span><strong>PM review</strong><p>Sửa JSON/rules trước khi lưu vào campaign.</p></article>
+      <article><span>4</span><strong>Test chat</strong><p>Kiểm tra tư vấn, ảnh và lead capture.</p></article>
+    </section>
     ${renderSeedLibrary({ demo, selectedSeed })}
     <form class="editor" method="post" action="${action}">
       <section>
@@ -508,7 +523,10 @@ function renderImportForm({ campaigns, action, sourceText, sourceType = 'text', 
         </label>
       </section>
       <section>
-        <h2>Tài liệu / bảng giá / nội dung website đã copy</h2>
+        <div class="section-title">
+          <h2>Tài liệu / bảng giá / nội dung website đã copy</h2>
+          <p>Dán nội dung vào đây nếu dùng nguồn text. Nếu đã chọn URL ở trên, có thể để trống.</p>
+        </div>
         <textarea name="sourceText" rows="18" spellcheck="false">${escapeHtml(sourceText)}</textarea>
       </section>
       <div class="actions">
@@ -542,7 +560,7 @@ function renderSeedLibrary({ demo, selectedSeed }) {
                 <strong>${escapeHtml(item.title)}</strong>
                 <p>${escapeHtml(item.note)}</p>
                 <div>
-                  <a href="${base}?seed=${encodeURIComponent(item.id)}">Điền URL import</a>
+                  <a class="seed-action" href="${base}?seed=${encodeURIComponent(item.id)}">Điền URL import</a>
                   <a href="${escapeHtml(item.path)}" target="_blank" rel="noreferrer">Mở file</a>
                 </div>
               </div>
@@ -622,29 +640,61 @@ function renderImportPage({ title, body }) {
         --brand-dark: #115e59;
         --warn-bg: #fff7ed;
         --warn-line: #fed7aa;
+        --ink: #070707;
+        --orange: #ff5a0a;
+        --orange-soft: #fff1e8;
       }
       * { box-sizing: border-box; }
       body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; line-height: 1.5; }
-      main { width: min(1180px, calc(100% - 32px)); margin: 28px auto 56px; }
+      main { width: min(1180px, calc(100% - 32px)); margin: 20px auto 56px; }
       h1, h2, p { margin: 0; }
-      h1 { font-size: 28px; line-height: 1.2; }
+      h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.02; }
       h2 { font-size: 18px; margin-bottom: 14px; }
       a { color: var(--brand-dark); font-weight: 700; text-decoration: none; }
-      .topbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 18px; }
-      .topbar p, .muted { color: var(--muted); }
+      .app-nav { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+      .brand-mark { display: inline-flex; align-items: center; gap: 10px; color: var(--text); }
+      .brand-mark span { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 13px; }
+      .nav-links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+      .nav-links a { color: var(--muted); }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 18px;
+        margin-bottom: 16px;
+        padding: 34px;
+        border-radius: 8px;
+        border: 1px solid #15171c;
+        color: #fff;
+        background:
+          radial-gradient(65% 75% at 84% 115%, rgb(255 90 10 / .72), transparent 60%),
+          linear-gradient(135deg, #070707 0%, #111318 58%, #201008 100%);
+      }
+      .topbar p { color: #d8dde6; margin-top: 10px; max-width: 760px; }
+      .eyebrow { color: #ffb088 !important; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .08em; }
+      .muted { color: var(--muted); }
       .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-      .button, button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; border: 1px solid var(--brand); border-radius: 6px; background: var(--brand); color: #fff; padding: 9px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+      .button, button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border: 1px solid var(--orange); border-radius: 8px; background: var(--orange); color: #fff; padding: 10px 14px; font: inherit; font-weight: 800; cursor: pointer; }
       .button.secondary { background: var(--surface); color: var(--brand-dark); border-color: var(--line); }
+      .topbar .button.secondary { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .25); }
       .back { display: inline-block; margin-bottom: 8px; }
-      section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; margin-bottom: 16px; }
+      section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
       section.warning { background: var(--warn-bg); border-color: var(--warn-line); }
+      .process { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0; background: transparent; border: 0; }
+      .process article { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+      .process span { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 800; margin-bottom: 10px; }
+      .process strong { display: block; margin-bottom: 4px; }
+      .process p { color: var(--muted); font-size: 14px; }
       .seed-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
       .seed-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
       .seed-item { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fbfcfd; }
-      .seed-item.active { border-color: var(--brand); background: #ecfdf5; }
+      .seed-item.active { border-color: var(--orange); background: var(--orange-soft); }
       .seed-item strong { display: block; margin-bottom: 4px; }
       .seed-item p { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
       .seed-item div { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+      .seed-action { color: var(--brand-dark); }
+      .section-title { margin-bottom: 14px; }
+      .section-title p { color: var(--muted); }
       label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 700; margin-bottom: 14px; }
       input, textarea, select { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; color: var(--text); font: inherit; background: #fff; }
       textarea { resize: vertical; }
@@ -653,8 +703,10 @@ function renderImportPage({ title, body }) {
       pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: #344054; }
       @media (max-width: 760px) {
         main { width: min(100% - 20px, 1180px); margin-top: 20px; }
+        .app-nav { height: auto; align-items: flex-start; flex-direction: column; margin-bottom: 14px; }
         .topbar { flex-direction: column; align-items: flex-start; }
         .grid { grid-template-columns: 1fr; }
+        .process { grid-template-columns: 1fr; }
         .seed-head { flex-direction: column; }
         .seed-list { grid-template-columns: 1fr; }
       }
