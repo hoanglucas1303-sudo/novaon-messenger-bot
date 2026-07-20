@@ -12,15 +12,15 @@ npm run dev            # cổng 3010
 ```
 
 - `GET /` — health check
-- `GET /dashboard` — unified dashboard thật: dự án, chat demo, knowledge, import, leads; cần `DASHBOARD_PASSWORD`
+- `GET /dashboard` — unified dashboard thật: dự án, chat demo, knowledge, import, leads; mở mặc định cho sample
 - `GET /dashboard/demo` — unified dashboard demo, không dùng lead thật
 - `GET /webhook` — Meta gọi để xác minh (dùng `VERIFY_TOKEN`)
 - `POST /webhook` — nhận sự kiện tin nhắn
-- `GET /leads` — mini dashboard xem lead, cần `DASHBOARD_PASSWORD`
+- `GET /leads` — mini dashboard xem lead; cần `DATABASE_URL` để có dữ liệu thật
 - `GET /leads/demo` — dashboard demo bằng dữ liệu mẫu, không hiển thị lead thật
-- `GET /studio` — Campaign Builder thật, cần `DASHBOARD_PASSWORD`
+- `GET /studio` — Campaign Builder thật, mở mặc định cho sample
 - `GET /studio/demo` — xem GUI Campaign Builder bằng campaign mẫu
-- `GET /studio/import` — Import Center thật: convert text/URL tài liệu thành draft data, cần `DASHBOARD_PASSWORD`
+- `GET /studio/import` — Import Center thật: convert text/URL tài liệu thành draft data, mở mặc định cho sample
 - `GET /studio/import/demo` — demo luồng import tài liệu → draft catalog/knowledge/rules
 - `GET /chat/:campaignSlug` — web chat test full flow, ví dụ `/chat/song-hong-demo`
 - `POST /api/chat` — API chat cho website/LDP
@@ -59,13 +59,13 @@ Field lead hiện có:
 Triển khai trên Railway:
 
 1. Gắn Railway Postgres vào service để có `DATABASE_URL`.
-2. Đặt `DASHBOARD_USER` và `DASHBOARD_PASSWORD`.
+2. Nếu đã có dữ liệu khách thật, đặt `DASHBOARD_LOCKED=true`, `DASHBOARD_USER` và `DASHBOARD_PASSWORD`.
 3. Deploy lại service. App sẽ tự tạo bảng `leads` nếu chưa có.
-4. Mở `/leads` và đăng nhập bằng Basic Auth.
+4. Mở `/leads`; nếu đã bật khóa thì đăng nhập bằng Basic Auth.
 
 Test nhanh trên Messenger: nhắn nhu cầu mua và để lại SĐT, ví dụ “Mình quan tâm đệm bông ép 1m6, gọi mình số 09xxxxxxxx”. Nếu AI phát lead đúng, dashboard sẽ có bản ghi mới.
 
-Xem thử UI khi chưa cấu hình DB/password: mở `/leads/demo`. Đây chỉ là dữ liệu mẫu đã che SĐT, không phải lead thật.
+Xem thử UI khi chưa cấu hình DB: mở `/leads/demo`. Đây chỉ là dữ liệu mẫu đã che SĐT, không phải lead thật.
 
 ## Campaign Builder + Web Chat
 
@@ -86,7 +86,7 @@ Mỗi campaign có:
 Route chính:
 
 - `/studio/demo` — xem Campaign Builder ngay, không lưu thay đổi
-- `/studio` — tạo/sửa campaign thật, cần `DASHBOARD_PASSWORD`
+- `/studio` — tạo/sửa campaign thật, mở mặc định cho sample; khóa bằng `DASHBOARD_LOCKED=true`
 - `/chat/song-hong-demo` — web chat test campaign Sông Hồng
 - `/chat/song-hong-demo?model=haiku` — ép dùng model rẻ để test chất lượng
 - `/chat/song-hong-demo?model=sonnet` — ép dùng Sonnet để so sánh
@@ -122,4 +122,4 @@ Import Center là lớp trung gian giữa tài liệu client và chatbot. MVP hi
 
 Route demo: `/studio/import/demo`.
 
-Route thật: `/studio/import`, dùng `DASHBOARD_PASSWORD`. Lưu ý: draft hiện lưu trong RAM, nên dùng thật bền vững cần `DATABASE_URL` và bước tiếp theo là lưu import drafts vào Postgres + upload PDF/Excel.
+Route thật: `/studio/import`, mở mặc định cho sample; khi có dữ liệu khách thật thì bật `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD`. Lưu ý: draft hiện lưu trong RAM, nên dùng thật bền vững cần `DATABASE_URL` và bước tiếp theo là lưu import drafts vào Postgres + upload PDF/Excel.

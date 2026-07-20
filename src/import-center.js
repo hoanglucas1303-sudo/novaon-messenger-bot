@@ -576,14 +576,14 @@ function renderImportPage({ title, body }) {
 }
 
 function ensureImportUnlocked(res) {
-  if (config.dashboardPassword) return true;
+  if (!config.dashboardLocked || config.dashboardPassword) return true;
   res.status(503).type('html').send(
     renderImportPage({
       title: 'Import Center đang khóa',
       body: `
         <section>
           <h1>Import Center đang khóa</h1>
-          <p>Đặt <code>DASHBOARD_PASSWORD</code> để mở bản thật. Có thể xem luồng demo tại <a href="/studio/import/demo">/studio/import/demo</a>.</p>
+          <p>Đặt <code>DASHBOARD_LOCKED=true</code> và <code>DASHBOARD_PASSWORD</code> để mở bản thật có khóa. Có thể xem luồng demo tại <a href="/studio/import/demo">/studio/import/demo</a>.</p>
         </section>
       `,
     })

@@ -1,7 +1,7 @@
 import { config } from './config.js';
 
 export function requireAdminAuth(req, res, next) {
-  if (!config.dashboardPassword) return next();
+  if (!config.dashboardLocked || !config.dashboardPassword) return next();
 
   const header = req.headers.authorization || '';
   const [scheme, encoded] = header.split(' ');

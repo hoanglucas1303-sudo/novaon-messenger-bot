@@ -24,7 +24,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 - [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express. ✅ VERIFIED 2026-07-20 (echo chạy thật trên page Nobo AI).
 - [x] **Phase 1 — Trả lời bằng AI (A):** knowledge (persona+luật+catalog Sông Hồng) → LLM (OpenRouter). ✅ VERIFIED 2026-07-20.
 - [x] **Phase 2 — Gửi ảnh:** LLM chèn dấu `##IMG:<id>` → backend gửi ảnh sản phẩm. ✅ VERIFIED 2026-07-20 (ảnh hiện thật trên Messenger).
-- [ ] **➡️ ĐANG LÀM — Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** Code đã implement 2026-07-20; chờ gắn Railway Postgres + `DASHBOARD_PASSWORD` rồi test thật trên Messenger để verify.
+- [ ] **➡️ ĐANG LÀM — Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** Code đã implement 2026-07-20; chờ gắn Railway Postgres rồi test thật trên Messenger để verify. Dashboard/studio/import mở mặc định cho sample; bật khóa bằng `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD` khi có dữ liệu khách thật.
 - [ ] **➡️ ĐANG MỞ RỘNG — Platform foundation: Campaign Builder + Web Chat Test.** Code đã implement 2026-07-20: `/studio`, `/studio/demo`, `/chat/:slug`, `/api/chat`, campaign store DB/fallback. Mục tiêu: tạo campaign, nạp hướng dẫn chatbot, test full flow trên web FE và Messenger.
 - [ ] **Phase 3 — RAG thật:** pgvector + tìm kiếm ngữ nghĩa (brainstorm thêm).
 - [ ] **Phase 4 — Dashboard quản trị data:** persona/luật/catalog/ảnh (chuyển knowledge.js → DB) + xem lead + multi-tenant.
@@ -35,7 +35,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từng bước:
 1. **DB (Postgres Railway)** — bảng `leads`. ✅ Implement: app tự tạo bảng khi có `DATABASE_URL`.
 2. **Bot ghi nhận:** khi khách để lại SĐT / đồng ý để tư vấn liên hệ → LLM phát dấu `##LEAD:{...}` (giống cơ chế `##IMG` đã chạy tốt) → backend **lưu lead** + xác nhận minh bạch với khách. ✅ Implement code; chờ test thật.
-3. **Trang xem lead** (mini dashboard) cho Sale: danh sách + chi tiết + ngữ cảnh hội thoại. ✅ Implement `/leads` có Basic Auth; chờ set `DASHBOARD_PASSWORD`.
+3. **Trang xem lead** (mini dashboard) cho Sale: danh sách + chi tiết + ngữ cảnh hội thoại. ✅ Implement `/leads`; có thể bật Basic Auth bằng `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD`.
 
 **Field 1 lead (đề xuất, chờ Lộc chốt):** `Tên (nếu có)` · `SĐT` · `Sản phẩm quan tâm` · `Nhu cầu/Ghi chú` (bot tự tóm) · `Thời gian` · `Trạng thái` (mới / Sale đã liên hệ).
 **KHÔNG có trong v1:** bot tự chốt, hứa giá/khuyến mại cụ thể, live-takeover.
@@ -44,15 +44,15 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Phase 0-1-2 — XONG & verified thật (2026-07-20).** Bot Nobo AI: tư vấn AI (persona+luật+catalog Sông Hồng) + gửi ảnh. Đủ 3 tính năng lõi brief. Giọng bot đã chỉnh về hướng "xin thông tin cho Sale, không tự chốt".
 
-**Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, mini dashboard thật `/leads`, và dashboard demo `/leads/demo` bằng dữ liệu mẫu đã che SĐT. Cần set `DATABASE_URL` + `DASHBOARD_PASSWORD` trên Railway rồi test lead thật bằng Messenger.
+**Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, mini dashboard thật `/leads`, và dashboard demo `/leads/demo` bằng dữ liệu mẫu đã che SĐT. Cần set `DATABASE_URL` trên Railway rồi test lead thật bằng Messenger; khi có dữ liệu thật nên bật `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD`.
 
-**Platform foundation — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Campaign Builder `/studio` (cần `DASHBOARD_PASSWORD`), GUI demo `/studio/demo`, web chat public `/chat/song-hong-demo`, API `/api/chat`. Campaign là brain dùng chung cho Messenger + Web Chat. Messenger map campaign bằng Page ID (`event.recipient.id`). Nếu chưa có DB, app dùng campaign Sông Hồng fallback trong RAM; dùng thật cần Railway Postgres.
+**Platform foundation — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Campaign Builder `/studio`, GUI demo `/studio/demo`, web chat public `/chat/song-hong-demo`, API `/api/chat`. Campaign là brain dùng chung cho Messenger + Web Chat. Messenger map campaign bằng Page ID (`event.recipient.id`). Nếu chưa có DB, app dùng campaign Sông Hồng fallback trong RAM; dùng thật cần Railway Postgres.
 
 **Product catalog test data — CODE IMPLEMENTED (2026-07-20).** Đã enrich campaign Sông Hồng fallback bằng giá tham khảo/biến thể và ảnh public từ nguồn online (`demxanh.com`, `songhonghanoi.vn`, `songhongonline.vn`). Ảnh đi qua proxy `/assets/remote-image` với allowlist domain. Dữ liệu phục vụ test flow hỏi giá/ảnh, chưa phải nguồn giá chính thức để bán thật.
 
-**Import Center — CODE IMPLEMENTED (2026-07-20), MVP.** Đã thêm `/studio/import` (auth) và `/studio/import/demo` (public demo). Luồng: paste text hoặc URL website → AI extractor dùng premium model → draft `products/knowledge/rules/recommendationRules` → PM review → publish merge vào campaign. Nếu thiếu OpenRouter key thì có heuristic fallback. Draft hiện lưu RAM; bước tiếp theo là lưu `import_drafts` vào Postgres và thêm upload PDF/Excel.
+**Import Center — CODE IMPLEMENTED (2026-07-20), MVP.** Đã thêm `/studio/import` và `/studio/import/demo` (public demo). Luồng: paste text hoặc URL website → AI extractor dùng premium model → draft `products/knowledge/rules/recommendationRules` → PM review → publish merge vào campaign. Nếu thiếu OpenRouter key thì có heuristic fallback. Draft hiện lưu RAM; bước tiếp theo là lưu `import_drafts` vào Postgres và thêm upload PDF/Excel.
 
-**Unified Dashboard — CODE IMPLEMENTED (2026-07-20).** Đã thêm `/dashboard` (auth) và `/dashboard/demo` (public demo). Gom quản lý dự án/campaign, nút bật chat demo, update knowledge nhanh, import tài liệu và lead gần nhất vào một màn. Các route `/studio`, `/studio/import`, `/leads` vẫn là màn chuyên sâu.
+**Unified Dashboard — CODE IMPLEMENTED (2026-07-20).** Đã thêm `/dashboard` và `/dashboard/demo` (public demo). Gom quản lý dự án/campaign, nút bật chat demo, update knowledge nhanh, import tài liệu và lead gần nhất vào một màn. Các route `/studio`, `/studio/import`, `/leads` vẫn là màn chuyên sâu.
 
 Cấu trúc:
 ```
@@ -77,7 +77,7 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Railway:** project **zealous-stillness** › service **novaon-messenger-bot**.
   - URL: `https://novaon-messenger-bot-production.up.railway.app` — webhook `/webhook`.
   - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN=novaon-messenger-verify-2026`, `LLM_MODEL=anthropic/claude-sonnet-4.6` (nên đổi sang `anthropic/claude-haiku-4.5`), `OPENROUTER_API_KEY` (key Future Content, Lộc dán tay).
-  - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `PUBLIC_BASE_URL` (mặc định = URL Railway), `DATABASE_URL` (cần cho lead capture), `DASHBOARD_PASSWORD` (cần để mở `/leads`).
+  - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `PUBLIC_BASE_URL` (mặc định = URL Railway), `DATABASE_URL` (cần cho lead capture), `DASHBOARD_LOCKED`/`DASHBOARD_PASSWORD` (chỉ cần khi muốn khóa dashboard thật).
 - **Meta App:** "Novaon Chatbot", **App ID `37150034544642460`** (Business, use case "Tương tác với khách hàng trên Messenger"). Đang **Development mode**.
 - **Fanpage test:** **Nobo Ai** — Page ID `1220791817792373` (profile URL `facebook.com/profile.php?id=61592078012566`). Webhook subscribe: `messages`, `messaging_postbacks`.
 - Token đưa vào Railway do **Lộc dán tay** (credential — Claude không nhập/đọc token).
@@ -87,8 +87,8 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Key OpenRouter:** dùng lại key Future Content hay cấp riêng? (Phase 1 cần → set `OPENROUTER_API_KEY` trên Railway.)
 - **APP_SECRET:** set sau để bật verify chữ ký webhook (hardening).
 - **Railway Postgres:** cần gắn DB vào service để có `DATABASE_URL`, rồi deploy lại.
-- **Dashboard leads:** cần set `DASHBOARD_PASSWORD` (và tuỳ chọn `DASHBOARD_USER`, mặc định `novaon`) trước khi mở `/leads`.
-- **Campaign Builder:** `/studio` dùng cùng `DASHBOARD_PASSWORD`; `/studio/demo` và `/chat/song-hong-demo` xem được UI/test web channel nhanh.
+- **Dashboard/Studio security:** hiện mở mặc định để demo nhanh; khi có dữ liệu khách thật thì set `DASHBOARD_LOCKED=true`, `DASHBOARD_PASSWORD` và tuỳ chọn `DASHBOARD_USER` (mặc định `novaon`).
+- **Campaign Builder:** `/studio`, `/studio/import`, `/dashboard` mở được ngay; `/studio/demo` và `/chat/song-hong-demo` vẫn là UI/test web channel nhanh.
 - **Campaign DB:** bảng `campaigns` tự tạo khi có `DATABASE_URL`. Chưa có DB thì chỉ dùng fallback RAM, không bền sau redeploy.
 - **LLM cost strategy:** code default mới là `CHEAP_LLM_MODEL=anthropic/claude-haiku-4.5`, `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6`, `LLM_MAX_TOKENS=350`. Web chat test được `?model=haiku|sonnet|auto`. Biến `LLM_MODEL` cũ nếu còn trên Railway chỉ được dùng làm premium fallback, không còn ép default route sang Sonnet.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).

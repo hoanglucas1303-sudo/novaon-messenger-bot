@@ -22,6 +22,7 @@ export const config = {
 
   // DB + dashboard leads (Phase v1)
   databaseUrl: process.env.DATABASE_URL || '',
+  dashboardLocked: process.env.DASHBOARD_LOCKED === 'true',
   dashboardUser: process.env.DASHBOARD_USER || 'novaon',
   dashboardPassword: process.env.DASHBOARD_PASSWORD || '',
 };
@@ -34,7 +35,7 @@ export function warnMissingConfig() {
   if (!config.databaseUrl) {
     console.warn('[config] ⚠️  DATABASE_URL chưa được đặt — lead capture sẽ chỉ log, chưa lưu DB.');
   }
-  if (!config.dashboardPassword) {
-    console.warn('[config] ⚠️  DASHBOARD_PASSWORD chưa được đặt — trang /leads sẽ bị khóa để tránh lộ SĐT khách.');
+  if (config.dashboardLocked && !config.dashboardPassword) {
+    console.warn('[config] ⚠️  DASHBOARD_LOCKED=true nhưng thiếu DASHBOARD_PASSWORD — dashboard sẽ mở tạm để tránh tự khóa.');
   }
 }

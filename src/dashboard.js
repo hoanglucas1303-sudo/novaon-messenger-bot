@@ -112,21 +112,6 @@ function route(handler) {
 }
 
 function ensureDashboardReady(res) {
-  if (!config.dashboardPassword) {
-    res.status(503).type('html').send(
-      renderPage({
-        title: 'Dashboard đang khóa',
-        body: `
-          <section class="empty">
-            <h2>Dashboard đang khóa</h2>
-            <p>Đặt biến môi trường <code>DASHBOARD_PASSWORD</code> trước khi mở trang lead để tránh lộ SĐT khách trên URL public.</p>
-          </section>
-        `,
-      })
-    );
-    return false;
-  }
-
   if (!hasDatabase()) {
     res.status(503).type('html').send(
       renderPage({

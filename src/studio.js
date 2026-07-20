@@ -114,14 +114,14 @@ function route(handler) {
 }
 
 function ensureStudioUnlocked(res) {
-  if (config.dashboardPassword) return true;
+  if (!config.dashboardLocked || config.dashboardPassword) return true;
   res.status(503).type('html').send(
     renderStudioPage({
       title: 'Studio đang khóa',
       body: `
         <section class="empty">
           <h1>Studio đang khóa</h1>
-          <p>Đặt <code>DASHBOARD_PASSWORD</code> để mở Campaign Builder thật. Có thể xem bản demo tại <a href="/studio/demo">/studio/demo</a> và test web chat tại <a href="/chat/song-hong-demo">/chat/song-hong-demo</a>.</p>
+          <p>Đặt <code>DASHBOARD_LOCKED=true</code> và <code>DASHBOARD_PASSWORD</code> để mở Campaign Builder có khóa. Có thể xem bản demo tại <a href="/studio/demo">/studio/demo</a> và test web chat tại <a href="/chat/song-hong-demo">/chat/song-hong-demo</a>.</p>
         </section>
       `,
     })

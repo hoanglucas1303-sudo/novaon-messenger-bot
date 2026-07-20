@@ -100,14 +100,14 @@ export function mountUnifiedDashboard(app) {
 }
 
 function ensureDashboardUnlocked(res) {
-  if (config.dashboardPassword) return true;
+  if (!config.dashboardLocked || config.dashboardPassword) return true;
   res.status(503).type('html').send(
     renderPage({
       title: 'Dashboard đang khóa',
       body: `
         <section class="empty">
           <h1>Dashboard đang khóa</h1>
-          <p>Đặt <code>DASHBOARD_PASSWORD</code> để mở dashboard thật. Có thể xem bản demo tại <a href="/dashboard/demo">/dashboard/demo</a>.</p>
+          <p>Đặt <code>DASHBOARD_LOCKED=true</code> và <code>DASHBOARD_PASSWORD</code> để mở dashboard có khóa. Có thể xem bản demo tại <a href="/dashboard/demo">/dashboard/demo</a>.</p>
         </section>
       `,
     })
