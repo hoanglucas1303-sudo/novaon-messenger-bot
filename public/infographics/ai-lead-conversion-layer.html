@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Lead Conversion Layer · Novaon</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f6f8;
+        --surface: #ffffff;
+        --text: #111318;
+        --muted: #626873;
+        --line: #e2e6ec;
+        --ink: #070707;
+        --orange: #ff5a0a;
+        --orange-dark: #d9480f;
+        --orange-soft: #fff1e8;
+        --teal: #0f766e;
+        --teal-soft: #e6f4f1;
+        --blue-soft: #edf4ff;
+        --purple-soft: #f2edff;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
+      main { width: min(1180px, calc(100% - 32px)); margin: 20px auto 56px; }
+      h1, h2, h3, p { margin: 0; }
+      a { color: var(--orange-dark); font-weight: 800; text-decoration: none; }
+      .nav { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 800; }
+      .brand span { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 13px; }
+      .links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+      .links a { color: var(--muted); }
+      .hero {
+        min-height: 330px;
+        padding: 40px;
+        border-radius: 8px;
+        color: #fff;
+        border: 1px solid #15171c;
+        background:
+          radial-gradient(70% 70% at 78% 118%, rgb(255 90 10 / .78), transparent 58%),
+          linear-gradient(135deg, #070707 0%, #111318 58%, #201008 100%);
+      }
+      .eyebrow { color: #ffb088; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .08em; margin-bottom: 10px; }
+      h1 { font-size: clamp(34px, 5vw, 64px); line-height: 1.02; max-width: 860px; }
+      .hero p { color: #d8dde6; margin-top: 14px; max-width: 800px; font-size: 18px; }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+      .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border-radius: 8px; padding: 10px 14px; background: var(--orange); color: #fff; border: 1px solid var(--orange); }
+      .button.secondary { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .25); }
+      section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px; margin: 16px 0; }
+      .section-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+      h2 { font-size: 24px; }
+      .section-head p, .muted { color: var(--muted); }
+      .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; overflow: hidden; margin: 16px 0; border-radius: 8px; background: var(--orange); }
+      .metric { padding: 18px; color: #fff; border-right: 1px solid rgb(255 255 255 / .25); }
+      .metric:last-child { border-right: 0; }
+      .metric strong { display: block; font-size: 28px; line-height: 1; margin-bottom: 6px; }
+      .metric span { color: rgb(255 255 255 / .84); font-weight: 800; }
+      .pipeline { display: grid; grid-template-columns: 1.05fr .9fr 1.05fr .9fr 1.05fr; gap: 12px; align-items: stretch; }
+      .node { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfcfd; min-height: 176px; }
+      .node.core { color: #fff; background: var(--ink); border-color: #15171c; }
+      .node h3 { margin-bottom: 8px; font-size: 18px; }
+      .node p { color: var(--muted); font-size: 14px; }
+      .node.core p { color: #d8dde6; }
+      .node ul { margin: 12px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+      .node.core ul { color: #d8dde6; }
+      .arrow { display: grid; place-items: center; color: var(--orange-dark); font-weight: 800; }
+      .arrow span { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 8px; background: var(--orange-soft); border: 1px solid #ffd1b8; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfcfd; }
+      .card strong { display: block; margin-bottom: 6px; }
+      .card p { color: var(--muted); font-size: 14px; }
+      .tag { display: inline-flex; border-radius: 999px; padding: 3px 9px; background: var(--teal-soft); color: var(--teal); font-weight: 800; font-size: 13px; margin-bottom: 10px; }
+      .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .compare article { border: 1px solid var(--line); border-radius: 8px; padding: 18px; }
+      .compare article:first-child { background: #fbfcfd; }
+      .compare article:last-child { background: var(--orange-soft); border-color: #ffd1b8; }
+      .compare h3 { margin-bottom: 12px; }
+      .compare ul { margin: 0; padding-left: 18px; color: var(--muted); }
+      .loop { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: center; }
+      .loop div { min-height: 96px; border-radius: 8px; padding: 14px; border: 1px solid var(--line); background: #fbfcfd; }
+      .loop strong { display: block; margin-bottom: 4px; }
+      .loop p { color: var(--muted); font-size: 13px; }
+      .loop .feedback { background: var(--teal-soft); border-color: #b9ded8; }
+      .schema { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+      .schema span { display: block; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fbfcfd; font-weight: 800; }
+      @media (max-width: 960px) {
+        .pipeline { grid-template-columns: 1fr; }
+        .arrow span { width: auto; min-width: 38px; transform: rotate(90deg); }
+        .grid, .schema { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .loop { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 680px) {
+        main { width: min(100% - 20px, 1180px); }
+        .nav, .section-head { height: auto; flex-direction: column; align-items: flex-start; }
+        .hero { min-height: auto; padding: 24px; }
+        .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .metric:nth-child(2) { border-right: 0; }
+        .grid, .compare, .schema { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav class="nav">
+        <a class="brand" href="/dashboard"><span>LC</span> AI Lead Layer</a>
+        <div class="links">
+          <a href="/dashboard">Dashboard</a>
+          <a href="/studio/import">Import Center</a>
+          <a href="/chat/song-hong-demo?model=auto">Chat demo</a>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <p class="eyebrow">Novaon Campaign Stack</p>
+        <h1>AI Lead Conversion Layer</h1>
+        <p>Không bán chatbot như một sản phẩm rời. Dùng AI như lớp chuyển đổi ở cuối chiến dịch: hiểu khách, tư vấn đúng ngữ cảnh, đóng gói lead profile và đẩy vào LeadTracker/CRM.</p>
+        <div class="actions">
+          <a class="button" href="/studio/import?seed=initial-catalog">Xem seed test</a>
+          <a class="button secondary" href="/dashboard">Mở dashboard</a>
+        </div>
+      </header>
+
+      <section class="metrics">
+        <article class="metric"><strong>1</strong><span>lớp AI dùng chung</span></article>
+        <article class="metric"><strong>n</strong><span>campaign/client</span></article>
+        <article class="metric"><strong>3</strong><span>channel đầu vào</span></article>
+        <article class="metric"><strong>1</strong><span>LeadTracker/CRM</span></article>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Mô Hình Dòng Chảy</h2>
+            <p>Từ attention của campaign đến lead profile có thể hành động.</p>
+          </div>
+        </div>
+        <div class="pipeline">
+          <article class="node">
+            <span class="tag">Traffic</span>
+            <h3>Ads / SEO / Social / LDP</h3>
+            <p>Agency tạo attention và nhu cầu ban đầu.</p>
+            <ul>
+              <li>Facebook Ads</li>
+              <li>Landing page</li>
+              <li>Messenger inbox</li>
+            </ul>
+          </article>
+          <div class="arrow"><span>→</span></div>
+          <article class="node core">
+            <span class="tag">AI Layer</span>
+            <h3>AI tư vấn theo campaign</h3>
+            <p>Bot dùng persona, offer, FAQ, catalog và rules của từng dự án.</p>
+            <ul>
+              <li>Hỏi nhu cầu</li>
+              <li>Gợi ý sản phẩm</li>
+              <li>Xin thông tin liên hệ</li>
+            </ul>
+          </article>
+          <div class="arrow"><span>→</span></div>
+          <article class="node">
+            <span class="tag">CRM</span>
+            <h3>LeadTracker nhận lead profile</h3>
+            <p>Không đẩy transcript thô. Đẩy hồ sơ khách đã được chưng cất.</p>
+            <ul>
+              <li>Intent hot/warm/cold</li>
+              <li>Nhu cầu + sản phẩm</li>
+              <li>Next action cho Sale</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Không Lưu Chat Để Khoe Số Lượng</h2>
+            <p>Lịch sử chat chỉ là nguyên liệu. Tài sản thật là lead profile có cấu trúc.</p>
+          </div>
+        </div>
+        <div class="compare">
+          <article>
+            <h3>Mô hình cũ: chat log centric</h3>
+            <ul>
+              <li>20.000 đoạn hội thoại rời rạc</li>
+              <li>Sale khó đọc, khó ưu tiên</li>
+              <li>Nhiều nhiễu: chào hỏi, hỏi lại, câu ngắn</li>
+              <li>Khó nối pipeline bán hàng</li>
+            </ul>
+          </article>
+          <article>
+            <h3>Mô hình mới: lead profile centric</h3>
+            <ul>
+              <li>Mỗi khách thành một hồ sơ nhu cầu</li>
+              <li>Có intent, sản phẩm, ngân sách, size</li>
+              <li>Có tóm tắt hội thoại và next action</li>
+              <li>Đẩy được vào LeadTracker/CRM</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Lead Profile Gồm Những Gì?</h2>
+            <p>Đây là gói dữ liệu mà AI nên gửi sang CRM thay vì gửi full transcript.</p>
+          </div>
+        </div>
+        <div class="schema">
+          <span>Tên + SĐT</span>
+          <span>Channel/source</span>
+          <span>Sản phẩm quan tâm</span>
+          <span>Size/ngân sách</span>
+          <span>Nhu cầu chính</span>
+          <span>Intent score</span>
+          <span>Hot / warm / cold</span>
+          <span>Next action</span>
+          <span>Tóm tắt hội thoại</span>
+          <span>Câu hỏi chưa trả lời</span>
+          <span>Owner Sale</span>
+          <span>Link transcript audit</span>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Vòng Lặp Tối Ưu Cho Agency</h2>
+            <p>Lead data không chỉ phục vụ Sale, nó quay lại giúp campaign tốt hơn.</p>
+          </div>
+        </div>
+        <div class="loop">
+          <div><strong>Campaign</strong><p>Offer, content, landing page, ads.</p></div>
+          <div><strong>AI Chat</strong><p>Tư vấn và khai thác nhu cầu.</p></div>
+          <div><strong>LeadTracker</strong><p>Lưu lead profile, pipeline và kết quả Sale.</p></div>
+          <div><strong>Insight</strong><p>Câu hỏi phổ biến, objections, sản phẩm được hỏi nhiều.</p></div>
+          <div class="feedback"><strong>Feedback lại campaign</strong><p>Cập nhật offer, FAQ, creative, landing page và knowledge.</p></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Định Vị Sản Phẩm</h2>
+            <p>Chatbot là giao diện. Sản phẩm thật là năng lực chuyển đổi và đo chất lượng lead.</p>
+          </div>
+        </div>
+        <div class="grid">
+          <article class="card"><span class="tag">Không bán rời</span><strong>Không chỉ là chatbot fanpage</strong><p>Chatbot riêng lẻ dễ bị coi là tool phụ. AI Lead Layer gắn thẳng vào KPI campaign.</p></article>
+          <article class="card"><span class="tag">Dùng lại</span><strong>Một module cho nhiều chiến dịch</strong><p>Mỗi campaign chỉ cần nạp persona, offer, catalog và rules riêng.</p></article>
+          <article class="card"><span class="tag">KPI</span><strong>Đo conversion quality</strong><p>Lead conversion rate, CPL qualified, lead hot/warm/cold, time-to-contact và câu hỏi còn thiếu.</p></article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

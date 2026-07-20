@@ -33,6 +33,7 @@ app.use(express.urlencoded({ extended: false, limit: '2mb' }));
 mountMediaRoutes(app);
 app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 app.use('/seed', express.static(path.join(__dirname, '..', 'public', 'seed')));
+app.use('/infographics', express.static(path.join(__dirname, '..', 'public', 'infographics')));
 
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)
 app.get('/', (_req, res) => {

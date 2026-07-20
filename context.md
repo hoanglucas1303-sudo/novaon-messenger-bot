@@ -58,6 +58,8 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **UI polish pass — CODE IMPLEMENTED (2026-07-20).** Đã nâng UI cho `/dashboard`, `/studio`, `/studio/import` và `/chat/:slug`: nav rõ hơn, hero tối có CTA, các bước vận hành 1-2-3-4, seed/import pipeline, form helper text và prompt test nhanh trong web chat.
 
+**Strategic infographic — CODE IMPLEMENTED (2026-07-20).** Đã thêm infographic `/infographics/ai-lead-conversion-layer.html` để mô tả mô hình mới: AI không bán như chatbot rời, mà là lớp chuyển đổi attention thành lead profile, đẩy sang LeadTracker/CRM và tạo feedback loop cho campaign.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh
