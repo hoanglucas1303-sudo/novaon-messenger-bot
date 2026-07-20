@@ -82,8 +82,17 @@ Route chính:
 - `/studio/demo` — xem Campaign Builder ngay, không lưu thay đổi
 - `/studio` — tạo/sửa campaign thật, cần `DASHBOARD_PASSWORD`
 - `/chat/song-hong-demo` — web chat test campaign Sông Hồng
+- `/chat/song-hong-demo?model=haiku` — ép dùng model rẻ để test chất lượng
+- `/chat/song-hong-demo?model=sonnet` — ép dùng Sonnet để so sánh
+- `/chat/song-hong-demo?model=auto` — tự chọn Haiku/Sonnet theo độ khó câu hỏi
 
 Khi có Postgres, campaign được lưu vào bảng `campaigns`. Nếu chưa có `DATABASE_URL`, app dùng campaign Sông Hồng trong bộ nhớ để vẫn test được web chat; dữ liệu tạo mới không bền sau redeploy.
+
+## LLM Cost Strategy
+
+Mặc định chatbot dùng `LLM_MODEL=anthropic/claude-haiku-4.5` để giảm chi phí cho các câu hỏi tư vấn thông thường. `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6` được giữ làm model premium cho câu hỏi dài/phức tạp hoặc khi web chat được ép `?model=sonnet`.
+
+Chế độ `auto` sẽ dùng Sonnet khi tin nhắn có tín hiệu cần suy luận kỹ, ví dụ so sánh nhiều sản phẩm, hỏi nên chọn loại nào, đau lưng, người già/trẻ em, hoặc tin nhắn rất dài. Các câu hỏi giá, ảnh, size và xin lead thông thường chạy bằng Haiku.
 
 ## Product Catalog Test Data
 

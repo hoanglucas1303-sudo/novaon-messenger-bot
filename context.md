@@ -15,7 +15,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 1. **Cơ chế AI = Kiểu A**: human viết trước *persona + luật trả lời + câu mẫu*, bot tự chạy 100% theo đó. (Không phải duyệt-từng-tin, không phải takeover — để dành sau.)
 2. **Ảnh sản phẩm:** backend Novaon tự host ảnh (URL public) → gửi qua Messenger bằng URL. LLM tự quyết gửi ảnh nào qua "tool".
 3. **Meta:** giai đoạn đầu chạy **Development mode** (chỉ page + admin/tester) → **không cần App Review**. Chỉ nộp review `pages_messaging` khi go-live cho Client thật.
-4. **Stack:** Node + Express (backend webhook), deploy Railway. Postgres (Railway) khi cần lưu knowledge/tenant. LLM = Claude qua OpenRouter (`anthropic/claude-sonnet-4.6`).
+4. **Stack:** Node + Express (backend webhook), deploy Railway. Postgres (Railway) khi cần lưu knowledge/tenant. LLM qua OpenRouter: default Haiku (`anthropic/claude-haiku-4.5`) để tiết kiệm, premium fallback Sonnet (`anthropic/claude-sonnet-4.6`) cho câu phức tạp.
 5. **Tầm nhìn HYBRID (bot + người):** bot lo phần lớn hành trình; ở **điểm chạm quan trọng gần cuối** thì con người quan trọng, nhưng **không phải lúc nào cũng cần người**. Cả 2 sẵn sàng, linh hoạt.
 6. **PHẠM VI v1 (Lộc chốt 2026-07-20):** bot **KHÔNG chốt đơn, KHÔNG hứa hẹn thay Sale**. Vai trò v1 = *tư vấn + gợi mở → XIN & GHI NHẬN thông tin liên hệ → để Sale tiếp nối bất cứ lúc nào*. Minh bạch 2 phía: khách biết "sẽ có nhân viên liên hệ" (trong hội thoại), quản trị thấy lead trên dashboard. Live-takeover (Handover Protocol) để dành ver sau.
 
@@ -70,7 +70,7 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **GitHub:** `hoanglucas1303-sudo/novaon-messenger-bot` (branch `main`, Railway auto-deploy).
 - **Railway:** project **zealous-stillness** › service **novaon-messenger-bot**.
   - URL: `https://novaon-messenger-bot-production.up.railway.app` — webhook `/webhook`.
-  - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN=novaon-messenger-verify-2026`, `LLM_MODEL=anthropic/claude-sonnet-4.6`, `OPENROUTER_API_KEY` (key Future Content, Lộc dán tay).
+  - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN=novaon-messenger-verify-2026`, `LLM_MODEL=anthropic/claude-sonnet-4.6` (nên đổi sang `anthropic/claude-haiku-4.5`), `OPENROUTER_API_KEY` (key Future Content, Lộc dán tay).
   - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `PUBLIC_BASE_URL` (mặc định = URL Railway), `DATABASE_URL` (cần cho lead capture), `DASHBOARD_PASSWORD` (cần để mở `/leads`).
 - **Meta App:** "Novaon Chatbot", **App ID `37150034544642460`** (Business, use case "Tương tác với khách hàng trên Messenger"). Đang **Development mode**.
 - **Fanpage test:** **Nobo Ai** — Page ID `1220791817792373` (profile URL `facebook.com/profile.php?id=61592078012566`). Webhook subscribe: `messages`, `messaging_postbacks`.
@@ -84,6 +84,7 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **Dashboard leads:** cần set `DASHBOARD_PASSWORD` (và tuỳ chọn `DASHBOARD_USER`, mặc định `novaon`) trước khi mở `/leads`.
 - **Campaign Builder:** `/studio` dùng cùng `DASHBOARD_PASSWORD`; `/studio/demo` và `/chat/song-hong-demo` xem được UI/test web channel nhanh.
 - **Campaign DB:** bảng `campaigns` tự tạo khi có `DATABASE_URL`. Chưa có DB thì chỉ dùng fallback RAM, không bền sau redeploy.
+- **LLM cost strategy:** code default mới là `LLM_MODEL=anthropic/claude-haiku-4.5`, `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6`, `LLM_MAX_TOKENS=350`. Web chat test được `?model=haiku|sonnet|auto`. Railway hiện có thể vẫn đang override `LLM_MODEL=anthropic/claude-sonnet-4.6`, cần đổi env để tiết kiệm thật.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
 ## Ghi chú kỹ thuật

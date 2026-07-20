@@ -84,9 +84,10 @@ async function handleEvent(event) {
     const campaign = await findCampaignByPageId(pageId);
     console.log(`[msg] ${senderId}: ${text}`);
     await sendTypingOn(senderId);
-    const { text: reply, images, lead, conversation } = await generateReply(senderId, text, {
+    const { text: reply, images, lead, conversation, modelTier } = await generateReply(senderId, text, {
       campaign,
       conversationKey: `messenger:${campaign.slug}:${senderId}`,
+      modelMode: 'auto',
     });
     await sendText(senderId, reply);
     if (images.length) await sendImages(senderId, images);
@@ -102,7 +103,7 @@ async function handleEvent(event) {
       if (savedLead) console.log(`[lead] Đã lưu lead #${savedLead.id} từ ${senderId}`);
     }
     console.log(
-      `[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}${lead ? ' (+lead)' : ''}`
+      `[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}${lead ? ' (+lead)' : ''}${modelTier ? ` (${modelTier})` : ''}`
     );
   } else if (event.message?.attachments) {
     await sendText(senderId, 'Mình đã nhận được tệp đính kèm của bạn 👍');

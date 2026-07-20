@@ -70,7 +70,7 @@ export function mountStudio(app) {
   app.get('/chat/:slug', route(async (req, res) => {
     const campaign = await getCampaignBySlug(req.params.slug);
     if (!campaign || !campaign.active) return res.status(404).send('Campaign not found');
-    res.type('html').send(renderChatPage(campaign));
+    res.type('html').send(renderChatPage(campaign, normalizeModelMode(req.query.model)));
   }));
 
   app.post('/api/chat', route(async (req, res) => {
@@ -84,6 +84,7 @@ export function mountStudio(app) {
     const result = await generateReply(sessionId, text, {
       campaign,
       conversationKey: `web:${campaign.slug}:${sessionId}`,
+      modelMode: normalizeModelMode(req.body.modelMode),
     });
 
     if (result.lead) {
@@ -100,6 +101,8 @@ export function mountStudio(app) {
       text: result.text,
       images: result.images,
       leadCaptured: Boolean(result.lead),
+      model: result.model,
+      modelTier: result.modelTier,
     });
   }));
 }
@@ -281,7 +284,7 @@ function renderStudioPage({ title, body }) {
 </html>`;
 }
 
-function renderChatPage(campaign) {
+function renderChatPage(campaign, modelMode = 'auto') {
   return `<!doctype html>
 <html lang="vi">
   <head>
@@ -306,6 +309,9 @@ function renderChatPage(campaign) {
       h1, p { margin: 0; }
       h1 { font-size: 20px; }
       header p { color: var(--muted); font-size: 14px; }
+      nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+      nav a { border: 1px solid var(--line); border-radius: 6px; color: var(--text); padding: 7px 10px; text-decoration: none; font-weight: 700; font-size: 13px; }
+      nav a.active { border-color: var(--brand); background: var(--brand); color: #fff; }
       #messages { padding: 18px; overflow-y: auto; display: grid; align-content: start; gap: 12px; }
       .msg { max-width: 78%; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
       .user { justify-self: end; background: var(--brand); color: #fff; border-color: var(--brand); }
@@ -328,8 +334,13 @@ function renderChatPage(campaign) {
       <header>
         <div>
           <h1>${escapeHtml(campaign.name)}</h1>
-          <p>Web chat test · ${escapeHtml(campaign.brand_name || campaign.slug)}</p>
+          <p>Web chat test · ${escapeHtml(campaign.brand_name || campaign.slug)} · model ${escapeHtml(modelMode)}</p>
         </div>
+        <nav>
+          <a class="${modelMode === 'auto' ? 'active' : ''}" href="/chat/${campaign.slug}?model=auto">Auto</a>
+          <a class="${modelMode === 'haiku' ? 'active' : ''}" href="/chat/${campaign.slug}?model=haiku">Haiku</a>
+          <a class="${modelMode === 'sonnet' ? 'active' : ''}" href="/chat/${campaign.slug}?model=sonnet">Sonnet</a>
+        </nav>
       </header>
       <main id="messages">
         <div class="msg bot">Dạ em chào anh/chị ạ. Anh/chị đang quan tâm sản phẩm hoặc nhu cầu nào để em tư vấn nhanh hơn?</div>
@@ -341,6 +352,7 @@ function renderChatPage(campaign) {
     </div>
     <script>
       const campaignSlug = ${JSON.stringify(campaign.slug)};
+      const modelMode = ${JSON.stringify(modelMode)};
       const sessionKey = 'novaon-chat-session-' + campaignSlug;
       let sessionId = localStorage.getItem(sessionKey);
       if (!sessionId) {
@@ -363,18 +375,18 @@ function renderChatPage(campaign) {
           const res = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ campaignSlug, sessionId, text }),
+            body: JSON.stringify({ campaignSlug, sessionId, text, modelMode }),
           });
           const data = await res.json();
           waiting.remove();
-          addMessage('bot', data.text || 'Dạ hệ thống đang bận một chút ạ.', data.images || [], data.leadCaptured);
+          addMessage('bot', data.text || 'Dạ hệ thống đang bận một chút ạ.', data.images || [], data.leadCaptured, data.modelTier);
         } catch {
           waiting.remove();
           addMessage('bot', 'Dạ hệ thống đang bận một chút, anh/chị thử lại giúp em ạ.');
         }
       });
 
-      function addMessage(role, text, images = [], leadCaptured = false) {
+      function addMessage(role, text, images = [], leadCaptured = false, modelTier = '') {
         const item = document.createElement('div');
         item.className = 'msg ' + role;
         item.textContent = text;
@@ -395,6 +407,12 @@ function renderChatPage(campaign) {
           badge.textContent = 'Đã ghi nhận lead';
           item.appendChild(badge);
         }
+        if (role === 'bot' && modelTier) {
+          const model = document.createElement('span');
+          model.className = 'lead';
+          model.textContent = 'Model: ' + modelTier;
+          item.appendChild(model);
+        }
         messages.appendChild(item);
         messages.scrollTop = messages.scrollHeight;
         return item;
@@ -408,6 +426,12 @@ function cleanSessionId(value) {
   return String(value || '')
     .replace(/[^a-zA-Z0-9_-]/g, '')
     .slice(0, 80) || `web_${Date.now()}`;
+}
+
+function normalizeModelMode(value) {
+  const mode = String(value || 'auto').toLowerCase();
+  if (mode === 'haiku' || mode === 'sonnet') return mode;
+  return 'auto';
 }
 
 function escapeHtml(value) {

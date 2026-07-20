@@ -3,6 +3,8 @@ import { brand, products } from './knowledge.js';
 import { campaignToPromptData, defaultCampaign } from './campaigns.js';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const CHEAP_MODEL_LABEL = 'haiku';
+const PREMIUM_MODEL_LABEL = 'sonnet';
 
 // Ghép catalog thành text gọn cho system prompt
 function renderCatalog(catalogProducts) {
@@ -140,10 +142,18 @@ function getHistory(conversationKey) {
 export async function generateReply(senderId, userText, options = {}) {
   const campaign = campaignToPromptData(options.campaign || defaultCampaign());
   const conversationKey = options.conversationKey || `${campaign.slug}:${senderId}`;
+  const modelChoice = selectModel(userText, options.modelMode);
 
   if (!config.openrouterApiKey) {
     console.warn('[llm] Thiếu OPENROUTER_API_KEY — trả lời tạm.');
-    return { text: brand.fallback, images: [], lead: null, conversation: [] };
+    return {
+      text: brand.fallback,
+      images: [],
+      lead: null,
+      conversation: [],
+      model: modelChoice.model,
+      modelTier: modelChoice.tier,
+    };
   }
 
   const history = getHistory(conversationKey);
@@ -159,10 +169,10 @@ export async function generateReply(senderId, userText, options = {}) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: config.llmModel,
+        model: modelChoice.model,
         messages,
         temperature: 0.6,
-        max_tokens: 500,
+        max_tokens: config.llmMaxTokens,
       }),
     });
 
@@ -170,14 +180,28 @@ export async function generateReply(senderId, userText, options = {}) {
       const err = await res.text();
       console.error(`[llm] OpenRouter lỗi ${res.status}:`, err);
       history.pop(); // gỡ tin user vừa thêm để không kẹt lịch sử
-      return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
+      return {
+        text: brand.fallback,
+        images: [],
+        lead: null,
+        conversation: history.slice(),
+        model: modelChoice.model,
+        modelTier: modelChoice.tier,
+      };
     }
 
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content?.trim();
     if (!raw) {
       history.pop();
-      return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
+      return {
+        text: brand.fallback,
+        images: [],
+        lead: null,
+        conversation: history.slice(),
+        model: modelChoice.model,
+        modelTier: modelChoice.tier,
+      };
     }
 
     const { text, images, lead } = parseReplyMarkers(raw, campaign.products);
@@ -186,10 +210,61 @@ export async function generateReply(senderId, userText, options = {}) {
     history.push({ role: 'assistant', content: cleanText });
     if (history.length > MAX_TURNS) history.splice(0, history.length - MAX_TURNS);
 
-    return { text: cleanText, images, lead, conversation: history.slice() };
+    return {
+      text: cleanText,
+      images,
+      lead,
+      conversation: history.slice(),
+      model: modelChoice.model,
+      modelTier: modelChoice.tier,
+    };
   } catch (e) {
     console.error('[llm] Lỗi gọi OpenRouter:', e);
     history.pop();
-    return { text: brand.fallback, images: [], lead: null, conversation: history.slice() };
+    return {
+      text: brand.fallback,
+      images: [],
+      lead: null,
+      conversation: history.slice(),
+      model: modelChoice.model,
+      modelTier: modelChoice.tier,
+    };
   }
+}
+
+function selectModel(userText, requestedMode = 'auto') {
+  const mode = String(requestedMode || 'auto').toLowerCase();
+  if (mode === CHEAP_MODEL_LABEL) return { model: config.llmModel, tier: CHEAP_MODEL_LABEL };
+  if (mode === PREMIUM_MODEL_LABEL) return { model: config.premiumLlmModel, tier: PREMIUM_MODEL_LABEL };
+
+  if (shouldUsePremium(userText)) {
+    return { model: config.premiumLlmModel, tier: PREMIUM_MODEL_LABEL };
+  }
+  return { model: config.llmModel, tier: CHEAP_MODEL_LABEL };
+}
+
+function shouldUsePremium(userText) {
+  const text = String(userText || '').toLowerCase();
+  if (text.length > 700) return true;
+  const premiumSignals = [
+    'so sánh',
+    'so sanh',
+    'khác nhau',
+    'khac nhau',
+    'nên chọn',
+    'nen chon',
+    'phù hợp nhất',
+    'phu hop nhat',
+    'đau lưng',
+    'dau lung',
+    'dị ứng',
+    'di ung',
+    'trẻ em',
+    'tre em',
+    'người già',
+    'nguoi gia',
+    'tư vấn kỹ',
+    'tu van ky',
+  ];
+  return premiumSignals.some((signal) => text.includes(signal));
 }
