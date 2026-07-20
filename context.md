@@ -19,6 +19,47 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 5. **Tầm nhìn HYBRID (bot + người):** bot lo phần lớn hành trình; ở **điểm chạm quan trọng gần cuối** thì con người quan trọng, nhưng **không phải lúc nào cũng cần người**. Cả 2 sẵn sàng, linh hoạt.
 6. **PHẠM VI v1 (Lộc chốt 2026-07-20):** bot **KHÔNG chốt đơn, KHÔNG hứa hẹn thay Sale**. Vai trò v1 = *tư vấn + gợi mở → XIN & GHI NHẬN thông tin liên hệ → để Sale tiếp nối bất cứ lúc nào*. Minh bạch 2 phía: khách biết "sẽ có nhân viên liên hệ" (trong hội thoại), quản trị thấy lead trên dashboard. Live-takeover (Handover Protocol) để dành ver sau.
 
+## Hand-off chiến lược — Ý nghĩa dài hạn
+
+**Insight mới chốt với Lộc (2026-07-20):** Không nên nhìn sản phẩm này như một chatbot bán riêng. Định vị đúng hơn là **AI Lead Conversion Layer** cho toàn bộ campaign stack của Agency.
+
+Ý nghĩa:
+
+- Novaon không chỉ chạy ads/content/LDP rồi chờ khách điền form hoặc inbox. Novaon có thể cắm một lớp AI ở điểm chạm cuối để tư vấn đúng ngữ cảnh, khai thác nhu cầu và chuyển hội thoại thành lead profile.
+- Chatbot là giao diện; sản phẩm thật là năng lực **biến attention thành lead có thể hành động**.
+- Mô hình này dùng chung cho nhiều chiến dịch/client: mỗi campaign nạp persona, offer, catalog, FAQ, rules riêng; output chuẩn hóa về lead.
+- Không nên lưu hàng chục nghìn lịch sử chat thô làm tài sản chính. Chat history chỉ là nguyên liệu ngắn hạn để AI chưng cất thành **Lead Profile**.
+- Lead Profile mới là thứ nên đẩy vào **LeadTracker/CRM**: tên/SĐT, channel/source, sản phẩm quan tâm, size/ngân sách, nhu cầu, intent hot/warm/cold, tóm tắt hội thoại, next action cho Sale, link transcript audit khi cần.
+- LeadTracker của Novaon có thể trở thành hệ thống đích cho module này. Bot Platform nên là lớp acquisition/qualification; LeadTracker là nơi quản lý pipeline, owner Sale, note chăm sóc và báo cáo.
+
+Mô hình dài hạn:
+
+```mermaid
+flowchart LR
+  A[Ads / SEO / Social / LDP / Messenger] --> B[AI Lead Conversion Layer]
+  B --> C[Lead Profile]
+  C --> D[LeadTracker / CRM]
+  D --> E[Sale / CS / Automation]
+  D --> F[Campaign Insight]
+  F --> A
+```
+
+Nguyên tắc kiến trúc:
+
+- **Lead profile centric, không chat log centric.**
+- Chat transcript giữ ngắn hạn hoặc archive có TTL để audit/debug, không phải màn vận hành chính.
+- Dashboard chatbot chỉ xem vận hành campaign và lead gần nhất; CRM/LeadTracker xử lý lead thật.
+- Mỗi lead cần trạng thái sync: local saved, LeadTracker synced, sync failed.
+- Ưu tiên tích hợp LeadTracker bằng webhook/API trước khi mở rộng CRM connector khác.
+
+Hướng triển khai tiếp theo:
+
+1. Chuẩn hóa schema lead profile v2: contact, interest, budget, size, intent score, lead temperature, conversation summary, next action.
+2. Thêm `LEADTRACKER_WEBHOOK_URL` và `LEADTRACKER_API_KEY`.
+3. Khi bot capture `##LEAD:{...}`, backend vừa lưu local vừa push sang LeadTracker.
+4. Dashboard hiển thị trạng thái sync và lỗi retry.
+5. Sau đó mới tính CRM connector mở rộng: HubSpot/Zoho/Bitrix/Sapo/Haravan/custom webhook.
+
 ## Lộ trình (phase — dừng review từng bước)
 
 - [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express. ✅ VERIFIED 2026-07-20 (echo chạy thật trên page Nobo AI).
@@ -76,6 +117,7 @@ src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sử
 src/config.js      đọc env
 public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders.mjs)
 public/seed/song-hong-large-test/ Bộ seed tài liệu Sông Hồng để tạo campaign/import/update/test prompt
+public/infographics/ Infographic chiến lược AI Lead Conversion Layer
 ```
 
 ## Hạ tầng đã dựng (identifiers)
@@ -97,6 +139,7 @@ public/seed/song-hong-large-test/ Bộ seed tài liệu Sông Hồng để tạo
 - **Dashboard/Studio security:** hiện mở mặc định để demo nhanh; khi có dữ liệu khách thật thì set `DASHBOARD_LOCKED=true`, `DASHBOARD_PASSWORD` và tuỳ chọn `DASHBOARD_USER` (mặc định `novaon`).
 - **Campaign Builder:** `/studio`, `/studio/import`, `/dashboard` mở được ngay; `/studio/demo` và `/chat/song-hong-demo` vẫn là UI/test web channel nhanh.
 - **Campaign DB:** bảng `campaigns` tự tạo khi có `DATABASE_URL`. Chưa có DB thì chỉ dùng fallback RAM, không bền sau redeploy.
+- **LeadTracker integration:** hướng sản phẩm dài hạn là đẩy lead profile sang LeadTracker/CRM. Cần làm schema lead profile v2 + `LEADTRACKER_WEBHOOK_URL`/`LEADTRACKER_API_KEY` + trạng thái sync.
 - **LLM cost strategy:** code default mới là `CHEAP_LLM_MODEL=anthropic/claude-haiku-4.5`, `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6`, `LLM_MAX_TOKENS=350`. Web chat test được `?model=haiku|sonnet|auto`. Biến `LLM_MODEL` cũ nếu còn trên Railway chỉ được dùng làm premium fallback, không còn ép default route sang Sonnet.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
