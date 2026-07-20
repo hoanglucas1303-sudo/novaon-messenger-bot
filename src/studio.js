@@ -151,7 +151,10 @@ function renderCampaignList(campaigns) {
         <h1>Campaign Builder</h1>
         <p>Tạo campaign, nạp hướng dẫn chatbot và test đa kênh.</p>
       </div>
-      <a class="button" href="/studio/campaigns/new">Tạo campaign</a>
+      <div class="actions">
+        <a class="button secondary" href="/studio/import">Import tài liệu</a>
+        <a class="button" href="/studio/campaigns/new">Tạo campaign</a>
+      </div>
     </header>
     <table>
       <thead>

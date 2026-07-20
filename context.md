@@ -50,6 +50,8 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Product catalog test data — CODE IMPLEMENTED (2026-07-20).** Đã enrich campaign Sông Hồng fallback bằng giá tham khảo/biến thể và ảnh public từ nguồn online (`demxanh.com`, `songhonghanoi.vn`, `songhongonline.vn`). Ảnh đi qua proxy `/assets/remote-image` với allowlist domain. Dữ liệu phục vụ test flow hỏi giá/ảnh, chưa phải nguồn giá chính thức để bán thật.
 
+**Import Center — CODE IMPLEMENTED (2026-07-20), MVP.** Đã thêm `/studio/import` (auth) và `/studio/import/demo` (public demo). Luồng: paste text hoặc URL website → AI extractor dùng premium model → draft `products/knowledge/rules/recommendationRules` → PM review → publish merge vào campaign. Nếu thiếu OpenRouter key thì có heuristic fallback. Draft hiện lưu RAM; bước tiếp theo là lưu `import_drafts` vào Postgres và thêm upload PDF/Excel.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh
@@ -59,6 +61,7 @@ src/db.js          Postgres helper + tự tạo bảng leads + CRUD trạng thá
 src/campaigns.js   campaign store DB/fallback + default campaign Sông Hồng
 src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái; /leads/demo để xem UI bằng dữ liệu mẫu
 src/studio.js      Campaign Builder /studio + web chat /chat/:slug + API /api/chat
+src/import-center.js Import Center: convert text/URL tài liệu thành draft data để review/publish
 src/media.js       proxy ảnh public qua /assets/remote-image với allowlist domain
 src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sửa)
 src/config.js      đọc env
@@ -98,4 +101,5 @@ public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders
 - **LLM ghi nhận lead** bằng cách chèn dòng `##LEAD: {"customerName":"...","phone":"...","productInterest":"...","note":"..."}` ở cuối khi đã có SĐT. Backend parse + gỡ khỏi text + lưu bảng `leads`; nếu chưa có `DATABASE_URL` thì chỉ log.
 - **Campaign model:** campaign chứa persona, rules, knowledge, products, page_ids, active. Core LLM dùng campaign; Messenger/Web Chat chỉ là adapter.
 - **Giá/ảnh sản phẩm:** catalog hiện có `variants`, `priceNote`, `sourceUrl`, `images`. Bot được phép báo giá tham khảo trong catalog nhưng không cam kết khuyến mại/chốt giá thay Sale.
+- **Import Center:** MVP nhận text/URL, chưa upload file nhị phân. Dữ liệu giá/sản phẩm extract phải qua human review trước khi publish.
 - Persona/luật/catalog nằm trong `src/knowledge.js` (Kiểu A). Luật cấm markdown (Messenger hiện `*` thô).

@@ -7,6 +7,7 @@ import { createLead, initDatabase } from './db.js';
 import { findCampaignByPageId, initCampaignStore } from './campaigns.js';
 import { mountDashboard } from './dashboard.js';
 import { mountStudio } from './studio.js';
+import { mountImportCenter } from './import-center.js';
 import { mountMediaRoutes } from './media.js';
 import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
@@ -18,12 +19,13 @@ const app = express();
 // Giữ lại raw body để verify chữ ký X-Hub-Signature-256 của Meta
 app.use(
   express.json({
+    limit: '2mb',
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
   })
 );
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false, limit: '2mb' }));
 
 // Phục vụ ảnh sản phẩm tự host: public/products/*.jpg -> /assets/products/*.jpg
 // (Production: Client upload ảnh vào đây; hiện Phase 2 test dùng ảnh placeholder trong knowledge.js)
@@ -37,6 +39,7 @@ app.get('/', (_req, res) => {
 
 mountDashboard(app);
 mountStudio(app);
+mountImportCenter(app);
 
 // --- Xác minh webhook (Meta gọi 1 lần khi cấu hình) ---
 app.get('/webhook', (req, res) => {
