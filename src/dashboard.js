@@ -2,6 +2,27 @@ import { config } from './config.js';
 import { getLead, hasDatabase, listLeads, updateLeadStatus } from './db.js';
 
 export function mountDashboard(app) {
+  app.get('/leads/demo', (req, res) => {
+    const status = typeof req.query.status === 'string' ? req.query.status : 'all';
+    res.type('html').send(
+      renderPage({
+        title: 'Demo Leads',
+        body: renderLeadList(filterDemoLeads(status), status, { basePath: '/leads/demo', demo: true }),
+      })
+    );
+  });
+
+  app.get('/leads/demo/:id', (req, res) => {
+    const lead = demoLeads.find((item) => String(item.id) === String(req.params.id));
+    if (!lead) return res.status(404).type('html').send(renderPage({ title: 'Không tìm thấy lead demo', body: '<p>Lead demo không tồn tại.</p>' }));
+    res.type('html').send(
+      renderPage({
+        title: `Demo Lead #${lead.id}`,
+        body: renderLeadDetail(lead, { basePath: '/leads/demo', canEdit: false, demo: true }),
+      })
+    );
+  });
+
   app.get('/leads', requireDashboardAuth, route(async (req, res) => {
     if (!ensureDashboardReady(res)) return;
     const status = typeof req.query.status === 'string' ? req.query.status : 'all';
@@ -25,6 +46,62 @@ export function mountDashboard(app) {
     }
     res.redirect(`/leads/${req.params.id}`);
   }));
+}
+
+const demoLeads = [
+  {
+    id: 1001,
+    customer_name: 'Anh Minh',
+    phone: '09xx xxx 128',
+    product_interest: 'Đệm bông ép Sông Hồng 1m6',
+    note: 'Cần tư vấn loại nằm chắc lưng, hỏi thêm khuyến mại và thời gian giao hàng.',
+    status: 'new',
+    sender_id: 'demo_psid_1001',
+    created_at: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
+    conversation: [
+      { role: 'user', content: 'Nhà mình muốn mua đệm bông ép 1m6, có mẫu nào nằm chắc lưng không?' },
+      { role: 'assistant', content: 'Dạ với nhu cầu nằm chắc lưng, anh/chị có thể tham khảo đệm bông ép Sông Hồng ạ. Dòng này phẳng, êm vừa và gấp gọn tiện lợi.' },
+      { role: 'user', content: 'Gọi mình tư vấn nhé, số 09xx xxx 128.' },
+      { role: 'assistant', content: 'Dạ em đã ghi nhận thông tin, bộ phận tư vấn sẽ liên hệ hỗ trợ anh/chị ạ.' },
+    ],
+  },
+  {
+    id: 1002,
+    customer_name: 'Chị Hằng',
+    phone: '08xx xxx 642',
+    product_interest: 'Back Essential',
+    note: 'Quan tâm dòng cao cấp, ưu tiên giảm đau lưng, giường 1m8.',
+    status: 'new',
+    sender_id: 'demo_psid_1002',
+    created_at: new Date(Date.now() - 1000 * 60 * 53).toISOString(),
+    conversation: [
+      { role: 'user', content: 'Mình hay đau lưng, muốn xem dòng cao cấp hơn.' },
+      { role: 'assistant', content: 'Dạ anh/chị có thể xem dòng Back Essential, có foam và memory foam để nâng đỡ cột sống tốt hơn ạ.' },
+      { role: 'user', content: 'Mình nằm giường 1m8, để nhân viên gọi lại giúp.' },
+      { role: 'assistant', content: 'Dạ anh/chị cho em xin số điện thoại để bộ phận tư vấn liên hệ hỗ trợ kỹ hơn ạ.' },
+    ],
+  },
+  {
+    id: 1003,
+    customer_name: 'Chưa có tên',
+    phone: '03xx xxx 905',
+    product_interest: 'Chăn ga gối Sông Hồng',
+    note: 'Muốn mua đồng bộ với đệm, hỏi mẫu cotton và màu sáng.',
+    status: 'contacted',
+    sender_id: 'demo_psid_1003',
+    created_at: new Date(Date.now() - 1000 * 60 * 130).toISOString(),
+    conversation: [
+      { role: 'user', content: 'Có bộ chăn ga gối màu sáng không shop?' },
+      { role: 'assistant', content: 'Dạ Sông Hồng có nhiều bộ chăn ga gối cotton mềm, phù hợp phối đồng bộ với đệm ạ.' },
+      { role: 'user', content: 'Số mình 03xx xxx 905, tư vấn mẫu giúp.' },
+      { role: 'assistant', content: 'Dạ em ghi nhận rồi ạ, nhân viên tư vấn sẽ liên hệ anh/chị để hỗ trợ chọn mẫu phù hợp.' },
+    ],
+  },
+];
+
+function filterDemoLeads(status) {
+  if (!status || status === 'all') return demoLeads;
+  return demoLeads.filter((lead) => lead.status === status);
 }
 
 function route(handler) {
@@ -84,12 +161,13 @@ function ensureDashboardReady(res) {
   return true;
 }
 
-function renderLeadList(leads, status) {
+function renderLeadList(leads, status, options = {}) {
+  const basePath = options.basePath || '/leads';
   const rows = leads
     .map(
       (lead) => `
         <tr>
-          <td><a href="/leads/${lead.id}">#${lead.id}</a></td>
+          <td><a href="${basePath}/${lead.id}">#${lead.id}</a></td>
           <td>${escapeHtml(lead.customer_name || 'Chưa có tên')}</td>
           <td>${escapeHtml(lead.phone)}</td>
           <td>${escapeHtml(lead.product_interest || '')}</td>
@@ -103,13 +181,13 @@ function renderLeadList(leads, status) {
   return `
     <header class="topbar">
       <div>
-        <h1>Lead Messenger</h1>
-        <p>${leads.length} lead gần nhất</p>
+        <h1>${options.demo ? 'Lead Messenger Demo' : 'Lead Messenger'}</h1>
+        <p>${leads.length} lead gần nhất${options.demo ? ' - dữ liệu mẫu' : ''}</p>
       </div>
       <nav>
-        ${filterLink('all', 'Tất cả', status)}
-        ${filterLink('new', 'Mới', status)}
-        ${filterLink('contacted', 'Đã liên hệ', status)}
+        ${filterLink('all', 'Tất cả', status, basePath)}
+        ${filterLink('new', 'Mới', status, basePath)}
+        ${filterLink('contacted', 'Đã liên hệ', status, basePath)}
       </nav>
     </header>
 
@@ -135,22 +213,30 @@ function renderLeadList(leads, status) {
   `;
 }
 
-function renderLeadDetail(lead) {
+function renderLeadDetail(lead, options = {}) {
+  const basePath = options.basePath || '/leads';
+  const canEdit = options.canEdit !== false;
   const conversation = Array.isArray(lead.conversation) ? lead.conversation : [];
   return `
     <header class="topbar">
       <div>
-        <a class="back" href="/leads">Quay lại danh sách</a>
-        <h1>Lead #${lead.id}</h1>
-        <p>${formatDate(lead.created_at)}</p>
+        <a class="back" href="${basePath}">Quay lại danh sách</a>
+        <h1>${options.demo ? 'Demo lead' : 'Lead'} #${lead.id}</h1>
+        <p>${formatDate(lead.created_at)}${options.demo ? ' - dữ liệu mẫu' : ''}</p>
       </div>
-      <form method="post" action="/leads/${lead.id}/status">
-        <select name="status">
-          <option value="new" ${lead.status === 'new' ? 'selected' : ''}>Mới</option>
-          <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Sale đã liên hệ</option>
-        </select>
-        <button type="submit">Lưu</button>
-      </form>
+      ${
+        canEdit
+          ? `
+            <form method="post" action="${basePath}/${lead.id}/status">
+              <select name="status">
+                <option value="new" ${lead.status === 'new' ? 'selected' : ''}>Mới</option>
+                <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Sale đã liên hệ</option>
+              </select>
+              <button type="submit">Lưu</button>
+            </form>
+          `
+          : `<span class="status ${lead.status}">${statusLabel(lead.status)}</span>`
+      }
     </header>
 
     <section class="detail">
@@ -352,9 +438,9 @@ function renderPage({ title, body }) {
 </html>`;
 }
 
-function filterLink(value, label, current) {
+function filterLink(value, label, current, basePath = '/leads') {
   const active = current === value || (!current && value === 'all') ? 'active' : '';
-  return `<a class="${active}" href="/leads?status=${value}">${label}</a>`;
+  return `<a class="${active}" href="${basePath}?status=${value}">${label}</a>`;
 }
 
 function statusLabel(status) {

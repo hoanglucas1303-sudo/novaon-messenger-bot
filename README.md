@@ -15,6 +15,7 @@ npm run dev            # cổng 3010
 - `GET /webhook` — Meta gọi để xác minh (dùng `VERIFY_TOKEN`)
 - `POST /webhook` — nhận sự kiện tin nhắn
 - `GET /leads` — mini dashboard xem lead, cần `DASHBOARD_PASSWORD`
+- `GET /leads/demo` — dashboard demo bằng dữ liệu mẫu, không hiển thị lead thật
 
 ## Nối Facebook Messenger (Phase 0)
 
@@ -55,3 +56,5 @@ Triển khai trên Railway:
 4. Mở `/leads` và đăng nhập bằng Basic Auth.
 
 Test nhanh trên Messenger: nhắn nhu cầu mua và để lại SĐT, ví dụ “Mình quan tâm đệm bông ép 1m6, gọi mình số 09xxxxxxxx”. Nếu AI phát lead đúng, dashboard sẽ có bản ghi mới.
+
+Xem thử UI khi chưa cấu hình DB/password: mở `/leads/demo`. Đây chỉ là dữ liệu mẫu đã che SĐT, không phải lead thật.

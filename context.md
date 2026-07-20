@@ -43,7 +43,7 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Phase 0-1-2 — XONG & verified thật (2026-07-20).** Bot Nobo AI: tư vấn AI (persona+luật+catalog Sông Hồng) + gửi ảnh. Đủ 3 tính năng lõi brief. Giọng bot đã chỉnh về hướng "xin thông tin cho Sale, không tự chốt".
 
-**Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, và mini dashboard `/leads`. Cần set `DATABASE_URL` + `DASHBOARD_PASSWORD` trên Railway rồi test bằng Messenger.
+**Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, mini dashboard thật `/leads`, và dashboard demo `/leads/demo` bằng dữ liệu mẫu đã che SĐT. Cần set `DATABASE_URL` + `DASHBOARD_PASSWORD` trên Railway rồi test lead thật bằng Messenger.
 
 Cấu trúc:
 ```
@@ -51,7 +51,7 @@ src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + ro
 src/messenger.js   Send API: sendText / sendImage / sendImages / sendTypingOn
 src/llm.js         gọi OpenRouter, build system prompt, lịch sử RAM, parse ##IMG + ##LEAD
 src/db.js          Postgres helper + tự tạo bảng leads + CRUD trạng thái
-src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái
+src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái; /leads/demo để xem UI bằng dữ liệu mẫu
 src/knowledge.js   persona + luật + catalog Sông Hồng (Kiểu A, human sửa)
 src/config.js      đọc env
 public/products/   6 ảnh placeholder PNG (sinh bằng scripts/gen-placeholders.mjs)
