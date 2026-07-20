@@ -12,6 +12,8 @@ npm run dev            # cổng 3010
 ```
 
 - `GET /` — health check
+- `GET /dashboard` — unified dashboard thật: dự án, chat demo, knowledge, import, leads; cần `DASHBOARD_PASSWORD`
+- `GET /dashboard/demo` — unified dashboard demo, không dùng lead thật
 - `GET /webhook` — Meta gọi để xác minh (dùng `VERIFY_TOKEN`)
 - `POST /webhook` — nhận sự kiện tin nhắn
 - `GET /leads` — mini dashboard xem lead, cần `DASHBOARD_PASSWORD`
@@ -68,6 +70,8 @@ Xem thử UI khi chưa cấu hình DB/password: mở `/leads/demo`. Đây chỉ 
 ## Campaign Builder + Web Chat
 
 Campaign là "brain" dùng chung cho nhiều channel. Messenger chỉ là adapter đầu tiên; web chat/LDP dùng cùng persona, luật, tài liệu và catalog.
+
+Dashboard chính để vận hành hằng ngày là `/dashboard`. Các route `/studio`, `/studio/import`, `/leads` vẫn tồn tại như màn chuyên sâu, nhưng đều được nối từ dashboard.
 
 Mỗi campaign có:
 

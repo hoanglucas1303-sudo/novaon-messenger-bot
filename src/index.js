@@ -6,6 +6,7 @@ import { config, warnMissingConfig } from './config.js';
 import { createLead, initDatabase } from './db.js';
 import { findCampaignByPageId, initCampaignStore } from './campaigns.js';
 import { mountDashboard } from './dashboard.js';
+import { mountUnifiedDashboard } from './unified-dashboard.js';
 import { mountStudio } from './studio.js';
 import { mountImportCenter } from './import-center.js';
 import { mountMediaRoutes } from './media.js';
@@ -34,9 +35,10 @@ app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
 
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)
 app.get('/', (_req, res) => {
-  res.send('Novaon Bot Platform ✅ Webhook: /webhook · Leads: /leads · Studio: /studio · Web test: /chat/song-hong-demo');
+  res.send('Novaon Bot Platform ✅ Dashboard: /dashboard · Demo: /dashboard/demo · Webhook: /webhook');
 });
 
+mountUnifiedDashboard(app);
 mountDashboard(app);
 mountStudio(app);
 mountImportCenter(app);

@@ -52,6 +52,8 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Import Center — CODE IMPLEMENTED (2026-07-20), MVP.** Đã thêm `/studio/import` (auth) và `/studio/import/demo` (public demo). Luồng: paste text hoặc URL website → AI extractor dùng premium model → draft `products/knowledge/rules/recommendationRules` → PM review → publish merge vào campaign. Nếu thiếu OpenRouter key thì có heuristic fallback. Draft hiện lưu RAM; bước tiếp theo là lưu `import_drafts` vào Postgres và thêm upload PDF/Excel.
 
+**Unified Dashboard — CODE IMPLEMENTED (2026-07-20).** Đã thêm `/dashboard` (auth) và `/dashboard/demo` (public demo). Gom quản lý dự án/campaign, nút bật chat demo, update knowledge nhanh, import tài liệu và lead gần nhất vào một màn. Các route `/studio`, `/studio/import`, `/leads` vẫn là màn chuyên sâu.
+
 Cấu trúc:
 ```
 src/index.js       webhook (verify + nhận sự kiện) + gửi text/ảnh + route /assets host ảnh
@@ -60,6 +62,7 @@ src/llm.js         gọi OpenRouter, build system prompt theo campaign, lịch s
 src/db.js          Postgres helper + tự tạo bảng leads + CRUD trạng thái
 src/campaigns.js   campaign store DB/fallback + default campaign Sông Hồng
 src/dashboard.js   mini dashboard /leads xem lead + chi tiết + đổi trạng thái; /leads/demo để xem UI bằng dữ liệu mẫu
+src/unified-dashboard.js Dashboard chính /dashboard + /dashboard/demo
 src/studio.js      Campaign Builder /studio + web chat /chat/:slug + API /api/chat
 src/import-center.js Import Center: convert text/URL tài liệu thành draft data để review/publish
 src/media.js       proxy ảnh public qua /assets/remote-image với allowlist domain
