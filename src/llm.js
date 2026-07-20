@@ -7,8 +7,9 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 function renderCatalog() {
   return products
     .map((p, i) => {
+      const hasImg = p.images?.length ? ` — có ${p.images.length} ảnh` : ' — chưa có ảnh';
       const lines = [
-        `${i + 1}. ${p.name}${p.line ? ` (${p.line})` : ''}`,
+        `${i + 1}. ${p.name}${p.line ? ` (${p.line})` : ''} [mã: ${p.id}${hasImg}]`,
         `   - Mô tả: ${p.description}`,
       ];
       if (p.features?.length) lines.push(`   - Điểm nổi bật: ${p.features.join(', ')}`);
@@ -29,7 +30,35 @@ function buildSystemPrompt() {
 ${rules}
 
 # DANH MỤC SẢN PHẨM (chỉ được dùng thông tin trong đây, không bịa thêm)
-${renderCatalog()}`;
+${renderCatalog()}
+
+# GỬI ẢNH CHO KHÁCH
+Khi khách muốn XEM ẢNH một sản phẩm (ví dụ "cho xem ảnh", "mẫu nào đẹp", "hình thực tế"...),
+hãy trả lời bình thường, rồi THÊM một dòng RIÊNG ở CUỐI theo đúng cú pháp:
+##IMG: <mã>
+Ví dụ khách muốn xem đệm bông ép → thêm dòng cuối: ##IMG: bong-ep
+Có thể gửi ảnh nhiều sản phẩm: ##IMG: bong-ep, back-essential
+CHỈ thêm dòng này khi khách thật sự muốn xem ảnh, và chỉ dùng mã có trong danh mục.
+KHÔNG nhắc tới "##IMG" hay việc gửi ảnh bằng cú pháp trong lời thoại với khách.`;
+}
+
+// Tách dấu ##IMG khỏi câu trả lời, tra ra URL ảnh của sản phẩm tương ứng
+const IMG_MARKER = /##IMG:\s*([a-z0-9\-,\s]+)/i;
+function extractImages(reply) {
+  const m = reply.match(IMG_MARKER);
+  const text = reply.replace(IMG_MARKER, '').trim();
+  if (!m) return { text, images: [] };
+
+  const ids = m[1]
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  const images = [];
+  for (const id of ids) {
+    const p = products.find((x) => x.id === id);
+    if (p?.images?.length) images.push(...p.images);
+  }
+  return { text, images };
 }
 
 // Bộ nhớ hội thoại ngắn hạn trong RAM (reset khi redeploy) — đủ cho MVP
@@ -43,12 +72,12 @@ function getHistory(senderId) {
 
 /**
  * Sinh câu trả lời cho 1 tin nhắn của khách.
- * @returns {Promise<string>} nội dung trả lời (đã có fallback nếu lỗi)
+ * @returns {Promise<{text: string, images: string[]}>}
  */
 export async function generateReply(senderId, userText) {
   if (!config.openrouterApiKey) {
     console.warn('[llm] Thiếu OPENROUTER_API_KEY — trả lời tạm.');
-    return brand.fallback;
+    return { text: brand.fallback, images: [] };
   }
 
   const history = getHistory(senderId);
@@ -75,24 +104,26 @@ export async function generateReply(senderId, userText) {
       const err = await res.text();
       console.error(`[llm] OpenRouter lỗi ${res.status}:`, err);
       history.pop(); // gỡ tin user vừa thêm để không kẹt lịch sử
-      return brand.fallback;
+      return { text: brand.fallback, images: [] };
     }
 
     const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content?.trim();
-    if (!reply) {
+    const raw = data.choices?.[0]?.message?.content?.trim();
+    if (!raw) {
       history.pop();
-      return brand.fallback;
+      return { text: brand.fallback, images: [] };
     }
 
-    history.push({ role: 'assistant', content: reply });
-    // Cắt bớt lịch sử cho gọn
+    const { text, images } = extractImages(raw);
+    // Lưu lịch sử bản đã gỡ dấu ##IMG cho sạch
+    const cleanText = text || 'Dạ em gửi anh/chị xem ảnh ạ 😊';
+    history.push({ role: 'assistant', content: cleanText });
     if (history.length > MAX_TURNS) history.splice(0, history.length - MAX_TURNS);
 
-    return reply;
+    return { text: cleanText, images };
   } catch (e) {
     console.error('[llm] Lỗi gọi OpenRouter:', e);
     history.pop();
-    return brand.fallback;
+    return { text: brand.fallback, images: [] };
   }
 }

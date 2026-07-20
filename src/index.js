@@ -1,8 +1,12 @@
 import express from 'express';
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { config, warnMissingConfig } from './config.js';
-import { sendText, sendTypingOn } from './messenger.js';
+import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
@@ -15,9 +19,13 @@ app.use(
   })
 );
 
+// Phục vụ ảnh sản phẩm tự host: public/products/*.jpg -> /assets/products/*.jpg
+// (Production: Client upload ảnh vào đây; hiện Phase 2 test dùng ảnh placeholder trong knowledge.js)
+app.use('/assets', express.static(path.join(__dirname, '..', 'public')));
+
 // Health check (Railway + kiểm tra nhanh bằng trình duyệt)
 app.get('/', (_req, res) => {
-  res.send('Novaon Messenger Bot ✅ (Phase 0 — echo). Webhook tại /webhook');
+  res.send('Novaon Messenger Bot ✅ (Phase 2 — AI + ảnh). Webhook tại /webhook');
 });
 
 // --- Xác minh webhook (Meta gọi 1 lần khi cấu hình) ---
@@ -59,14 +67,15 @@ async function handleEvent(event) {
   const senderId = event.sender?.id;
   if (!senderId) return;
 
-  // Phase 1: trả lời bằng AI (persona + luật + knowledge trong knowledge.js).
+  // Phase 1+2: trả lời bằng AI (persona + luật + knowledge) và gửi ảnh khi cần.
   if (event.message?.text) {
     const text = event.message.text;
     console.log(`[msg] ${senderId}: ${text}`);
     await sendTypingOn(senderId);
-    const reply = await generateReply(senderId, text);
+    const { text: reply, images } = await generateReply(senderId, text);
     await sendText(senderId, reply);
-    console.log(`[bot] ${senderId}: ${reply}`);
+    if (images.length) await sendImages(senderId, images);
+    console.log(`[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}`);
   } else if (event.message?.attachments) {
     await sendText(senderId, 'Mình đã nhận được tệp đính kèm của bạn 👍');
   } else if (event.postback) {

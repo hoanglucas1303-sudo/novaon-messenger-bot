@@ -41,7 +41,10 @@ export const products = [
     sizes: ['1m2 x 2m', '1m6 x 2m', '1m8 x 2m'],
     thickness: ['5cm', '9cm'],
     price: 'Liên hệ để được báo giá & khuyến mại',
-    images: [],
+    images: [
+      'https://placehold.co/800x600/9D174D/FFFFFF/png?text=Dem+Bong+Ep+Song+Hong',
+      'https://placehold.co/800x600/BE185D/FFFFFF/png?text=Dem+Bong+Ep+-+Gap+Gon',
+    ],
   },
   {
     id: 'sieu-nay-fiber',
@@ -53,7 +56,7 @@ export const products = [
     sizes: ['1m2 x 2m', '1m6 x 2m', '1m8 x 2m'],
     thickness: ['9cm', '10cm'],
     price: 'Liên hệ để được báo giá & khuyến mại',
-    images: [],
+    images: ['https://placehold.co/800x600/9D174D/FFFFFF/png?text=Dem+Sieu+Nay+Fiber'],
   },
   {
     id: 'back-essential',
@@ -65,7 +68,10 @@ export const products = [
     sizes: ['1m6 x 2m', '1m8 x 2m'],
     thickness: ['17cm', '22cm', '27cm', '32cm'],
     price: 'Liên hệ để được báo giá & khuyến mại',
-    images: [],
+    images: [
+      'https://placehold.co/800x600/9D174D/FFFFFF/png?text=Back+Essential+-+Memory+Foam',
+      'https://placehold.co/800x600/BE185D/FFFFFF/png?text=Back+Essential+-+Nang+Do+Cot+Song',
+    ],
   },
   {
     id: 'chan-ga-goi',
@@ -76,6 +82,6 @@ export const products = [
     features: ['Chất cotton mềm', 'Nhiều màu/hoạ tiết', 'Đồng bộ với đệm'],
     sizes: ['Theo kích thước giường 1m2 / 1m6 / 1m8'],
     price: 'Liên hệ để được báo giá',
-    images: [],
+    images: ['https://placehold.co/800x600/9D174D/FFFFFF/png?text=Chan+Ga+Goi+Song+Hong'],
   },
 ];
