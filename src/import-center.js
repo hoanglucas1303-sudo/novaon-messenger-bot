@@ -495,7 +495,7 @@ function renderImportForm({ campaigns, action, sourceText, sourceType = 'text', 
         <h1>${demo ? 'Import Center Demo' : 'Import Center'}</h1>
         <p>Chuyển tài liệu client thành draft catalog, knowledge, rules và gợi ý tư vấn để PM review trước khi publish.</p>
       </div>
-      <a class="button secondary" href="/seed/song-hong-large-test/README.md" target="_blank" rel="noreferrer">Mở bộ seed</a>
+      <a class="button secondary" href="/seed/song-hong-large-test/overview.html" target="_blank" rel="noreferrer">Xem quy mô seed</a>
     </header>
     <section class="process">
       <article><span>1</span><strong>Chọn nguồn</strong><p>Paste text hoặc dùng URL seed/website.</p></article>
@@ -550,7 +550,7 @@ function renderSeedLibrary({ demo, selectedSeed }) {
           <h2>Seed tài liệu test</h2>
           <p class="muted">Case Sông Hồng lớn: tạo dự án mới, import catalog, cập nhật giá/sản phẩm và test flow tư vấn.</p>
         </div>
-        <a class="button secondary" href="/seed/song-hong-large-test/README.md" target="_blank" rel="noreferrer">README seed</a>
+        <a class="button secondary" href="/seed/song-hong-large-test/overview.html" target="_blank" rel="noreferrer">Overview seed</a>
       </div>
       <div class="seed-list">
         ${seedDocuments

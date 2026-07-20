@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Seed Overview · Sông Hồng Large Test</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f6f8;
+        --surface: #ffffff;
+        --text: #111318;
+        --muted: #626873;
+        --line: #e2e6ec;
+        --ink: #070707;
+        --orange: #ff5a0a;
+        --orange-dark: #d9480f;
+        --orange-soft: #fff1e8;
+        --teal-soft: #e6f4f1;
+        --teal: #0f766e;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
+      main { width: min(1160px, calc(100% - 32px)); margin: 20px auto 56px; }
+      h1, h2, h3, p { margin: 0; }
+      a { color: var(--orange-dark); font-weight: 800; text-decoration: none; }
+      .nav { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+      .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 800; }
+      .brand span { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 13px; }
+      .links { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+      .links a { color: var(--muted); }
+      .hero {
+        min-height: 300px;
+        padding: 38px;
+        border-radius: 8px;
+        color: #fff;
+        border: 1px solid #15171c;
+        background:
+          radial-gradient(70% 70% at 78% 118%, rgb(255 90 10 / .78), transparent 58%),
+          linear-gradient(135deg, #070707 0%, #111318 58%, #201008 100%);
+      }
+      .eyebrow { color: #ffb088; font-weight: 800; text-transform: uppercase; font-size: 12px; letter-spacing: .08em; margin-bottom: 10px; }
+      h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; max-width: 760px; }
+      .hero p { color: #d8dde6; margin-top: 12px; max-width: 740px; font-size: 17px; }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+      .button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border-radius: 8px; padding: 10px 14px; background: var(--orange); color: #fff; border: 1px solid var(--orange); }
+      .button.secondary { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .25); }
+      .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; overflow: hidden; margin: 16px 0; border-radius: 8px; background: var(--orange); }
+      .metric { padding: 18px; color: #fff; border-right: 1px solid rgb(255 255 255 / .25); }
+      .metric:last-child { border-right: 0; }
+      .metric strong { display: block; font-size: 30px; line-height: 1; margin-bottom: 6px; }
+      .metric span { color: rgb(255 255 255 / .84); font-weight: 800; }
+      section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+      .section-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+      h2 { font-size: 22px; }
+      .section-head p, .muted { color: var(--muted); }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfcfd; }
+      .card strong { display: block; margin-bottom: 6px; }
+      .card p { color: var(--muted); font-size: 14px; }
+      .tag { display: inline-flex; border-radius: 999px; padding: 3px 9px; background: var(--teal-soft); color: var(--teal); font-weight: 800; font-size: 13px; margin-bottom: 10px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 13px; }
+      tr:last-child td { border-bottom: 0; }
+      .flow { counter-reset: step; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+      .flow article { border: 1px solid var(--line); border-radius: 8px; padding: 16px; background: #fbfcfd; }
+      .flow article::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 800; margin-bottom: 10px; }
+      @media (max-width: 860px) {
+        main { width: min(100% - 20px, 1160px); }
+        .nav, .section-head { height: auto; flex-direction: column; align-items: flex-start; }
+        .hero { padding: 24px; min-height: auto; }
+        .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .metric:nth-child(2) { border-right: 0; }
+        .grid, .flow { grid-template-columns: 1fr; }
+        table { display: block; overflow-x: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav class="nav">
+        <a class="brand" href="/dashboard"><span>SD</span> Seed Overview</a>
+        <div class="links">
+          <a href="/studio/import?seed=initial-catalog">Import catalog</a>
+          <a href="/studio/import?seed=update">Import update</a>
+          <a href="/chat/song-hong-demo?model=auto">Chat demo</a>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <p class="eyebrow">Sông Hồng Large Test</p>
+        <h1>Quy mô bộ seed dùng để test platform chatbot</h1>
+        <p>Đây không chỉ là vài file markdown. Bộ seed này mô phỏng một vòng đời dự án: tạo campaign, import catalog ban đầu, bổ sung FAQ/playbook, update giá/sản phẩm và kiểm thử hội thoại.</p>
+        <div class="actions">
+          <a class="button" href="/studio/import?seed=initial-catalog">Bắt đầu import catalog</a>
+          <a class="button secondary" href="/seed/song-hong-large-test/README.md">Đọc README</a>
+        </div>
+      </header>
+
+      <section class="metrics">
+        <article class="metric"><strong>8</strong><span>file seed vận hành</span></article>
+        <article class="metric"><strong>9</strong><span>nhóm sản phẩm test</span></article>
+        <article class="metric"><strong>42</strong><span>dòng giá/biến thể</span></article>
+        <article class="metric"><strong>22</strong><span>prompt kiểm thử</span></article>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Seed Bao Phủ Những Gì?</h2>
+            <p>Nhìn vào đây để biết dữ liệu đủ test những năng lực nào của hệ thống.</p>
+          </div>
+        </div>
+        <div class="grid">
+          <article class="card"><span class="tag">Setup</span><strong>Project brief + campaign JSON</strong><p>Persona, phạm vi, luật giá/ảnh/lead và cấu hình campaign mẫu để tạo dự án mới.</p></article>
+          <article class="card"><span class="tag">Catalog</span><strong>6 nhóm sản phẩm ban đầu</strong><p>Đệm bông ép, Siêu Nảy Fiber, Back Essential, Basic Cotton, Urban và ruột chăn gối.</p></article>
+          <article class="card"><span class="tag">Update</span><strong>3 sản phẩm mới + 1 cập nhật giá</strong><p>BC26 Series, Chăn đông Basic Cotton, Ruột gối 45x65cm và bổ sung giá size 1m4/1m2.</p></article>
+          <article class="card"><span class="tag">Knowledge</span><strong>9 FAQ/chính sách</strong><p>Giá, ảnh, đau lưng, giao hàng, bảo hành, người lớn tuổi và combo đệm + ga gối.</p></article>
+          <article class="card"><span class="tag">Playbook</span><strong>6 bước tư vấn + 13 recommendation rules</strong><p>Logic hỏi nhu cầu, chọn sản phẩm theo pain point và phân loại lead nóng/ấm/lạnh.</p></article>
+          <article class="card"><span class="tag">QA</span><strong>22 prompt kiểm thử</strong><p>Test tư vấn, giá theo size, ảnh sản phẩm, lead capture và hành vi sau update knowledge.</p></article>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Thứ Tự Import Đề Xuất</h2>
+            <p>Đi theo flow này để thấy seed ban đầu và seed update khác nhau như thế nào.</p>
+          </div>
+        </div>
+        <div class="flow">
+          <article><strong>Catalog ban đầu</strong><p class="muted">Tạo nền sản phẩm, giá, ảnh và nguồn cho chatbot.</p><a href="/studio/import?seed=initial-catalog">Import catalog</a></article>
+          <article><strong>FAQ/chính sách</strong><p class="muted">Bổ sung cách trả lời, guardrails và ngữ cảnh tư vấn.</p><a href="/studio/import?seed=faq">Import FAQ</a></article>
+          <article><strong>Sales playbook</strong><p class="muted">Thêm logic gợi ý có chủ đích và phân loại lead.</p><a href="/studio/import?seed=playbook">Import playbook</a></article>
+          <article><strong>Update sau này</strong><p class="muted">Test thêm sản phẩm mới, giá mới và thay đổi recommendation rules.</p><a href="/studio/import?seed=update">Import update</a></article>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h2>Inventory File</h2>
+            <p>Mỗi file có một vai trò riêng, không cần đọc từng file để đo quy mô nữa.</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>File</th><th>Vai trò</th><th>Quy mô nội dung</th><th>Link</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>01-initial-project-brief.md</td><td>Tạo dự án</td><td>Persona, scope, luật giá/ảnh/lead</td><td><a href="/seed/song-hong-large-test/01-initial-project-brief.md">Mở</a></td></tr>
+            <tr><td>02-initial-catalog-products.txt</td><td>Catalog ban đầu</td><td>6 sản phẩm, 28 dòng giá/biến thể, 9 URL ảnh</td><td><a href="/seed/song-hong-large-test/02-initial-catalog-products.txt">Mở</a></td></tr>
+            <tr><td>03-initial-faq-policies.txt</td><td>Knowledge mềm</td><td>9 FAQ/chính sách + rules chatbot</td><td><a href="/seed/song-hong-large-test/03-initial-faq-policies.txt">Mở</a></td></tr>
+            <tr><td>04-initial-sales-playbook.txt</td><td>Tư vấn có chủ đích</td><td>6 bước tư vấn, 9 recommendation rules, lead scoring</td><td><a href="/seed/song-hong-large-test/04-initial-sales-playbook.txt">Mở</a></td></tr>
+            <tr><td>05-update-price-and-new-products.txt</td><td>Update knowledge</td><td>3 sản phẩm mới, 14 dòng giá/update, 4 recommendation rules mới</td><td><a href="/seed/song-hong-large-test/05-update-price-and-new-products.txt">Mở</a></td></tr>
+            <tr><td>test-prompts.md</td><td>QA hội thoại</td><td>22 prompt cho tư vấn, giá, ảnh, lead và update</td><td><a href="/seed/song-hong-large-test/test-prompts.md">Mở</a></td></tr>
+            <tr><td>campaign.seed.json</td><td>Config mẫu</td><td>Campaign shell để copy/tạo dự án</td><td><a href="/seed/song-hong-large-test/campaign.seed.json">Mở</a></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

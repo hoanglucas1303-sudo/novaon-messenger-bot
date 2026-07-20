@@ -112,7 +112,7 @@ Các nguồn giá/ảnh hiện đang dùng gồm `demxanh.com`, `songhonghanoi.v
 
 ## Seed Data Cho Test Case Lớn
 
-Đã có bộ tài liệu seed Sông Hồng tại `/seed/song-hong-large-test/README.md` và trong repo ở `public/seed/song-hong-large-test/`.
+Đã có bộ tài liệu seed Sông Hồng tại `/seed/song-hong-large-test/overview.html`, README tại `/seed/song-hong-large-test/README.md`, và trong repo ở `public/seed/song-hong-large-test/`.
 
 Bộ seed gồm:
 

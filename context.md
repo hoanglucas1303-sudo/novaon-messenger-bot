@@ -50,7 +50,7 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Product catalog test data — CODE IMPLEMENTED (2026-07-20).** Đã enrich campaign Sông Hồng fallback bằng giá tham khảo/biến thể và ảnh public từ nguồn online (`demxanh.com`, `songhonghanoi.vn`, `songhongonline.vn`). Ảnh đi qua proxy `/assets/remote-image` với allowlist domain. Dữ liệu phục vụ test flow hỏi giá/ảnh, chưa phải nguồn giá chính thức để bán thật.
 
-**Seed data test case lớn — CODE IMPLEMENTED (2026-07-20).** Đã thêm bộ tài liệu seed tại `public/seed/song-hong-large-test/` và route public `/seed/song-hong-large-test/README.md`. Import Center có panel “Seed tài liệu test” để điền nhanh URL import cho project brief, catalog ban đầu, FAQ/chính sách, sales playbook, update giá/thêm sản phẩm và test prompts.
+**Seed data test case lớn — CODE IMPLEMENTED (2026-07-20).** Đã thêm bộ tài liệu seed tại `public/seed/song-hong-large-test/`, route overview `/seed/song-hong-large-test/overview.html` và README `/seed/song-hong-large-test/README.md`. Import Center có panel “Seed tài liệu test” để điền nhanh URL import cho project brief, catalog ban đầu, FAQ/chính sách, sales playbook, update giá/thêm sản phẩm và test prompts.
 
 **Import Center — CODE IMPLEMENTED (2026-07-20), MVP.** Đã thêm `/studio/import` và `/studio/import/demo` (public demo). Luồng: paste text hoặc URL website → AI extractor dùng premium model → draft `products/knowledge/rules/recommendationRules` → PM review → publish merge vào campaign. Nếu thiếu OpenRouter key thì có heuristic fallback. Draft hiện lưu RAM; bước tiếp theo là lưu `import_drafts` vào Postgres và thêm upload PDF/Excel.
 

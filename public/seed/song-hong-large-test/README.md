@@ -2,6 +2,9 @@
 
 Bộ tài liệu mẫu để test một dự án chatbot tư vấn chăn ga gối đệm Sông Hồng ở quy mô lớn hơn.
 
+Nếu muốn nhìn nhanh quy mô seed trước khi đọc từng file, mở trang overview:
+`/seed/song-hong-large-test/overview.html`
+
 Mục tiêu:
 - Tạo campaign mới từ tài liệu ban đầu.
 - Import catalog có sản phẩm, giá theo biến thể, ảnh sản phẩm.
@@ -29,4 +32,3 @@ Nguồn tham khảo public:
 - https://demxanh.com/bang-gia-dem-bong-ep-song-hong-khuyen-mai.html
 - https://songhongchinhhang.vn/
 - https://khodemhanoi.vn/dem-bong-ep-song-hong-gia-bao-nhieu-do-day-va-kich-thuoc-dem-song-hong/
-
