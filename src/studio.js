@@ -429,6 +429,7 @@ function renderChatPage(campaign, modelMode = 'auto') {
           <a class="${modelMode === 'auto' ? 'active' : ''}" href="/chat/${campaign.slug}?model=auto">Auto</a>
           <a class="${modelMode === 'haiku' ? 'active' : ''}" href="/chat/${campaign.slug}?model=haiku">Haiku</a>
           <a class="${modelMode === 'sonnet' ? 'active' : ''}" href="/chat/${campaign.slug}?model=sonnet">Sonnet</a>
+          <a class="${modelMode === 'gemini' ? 'active' : ''}" href="/chat/${campaign.slug}?model=gemini">Gemini</a>
         </nav>
       </header>
       <main id="messages">
@@ -534,7 +535,7 @@ function cleanSessionId(value) {
 
 function normalizeModelMode(value) {
   const mode = String(value || 'auto').toLowerCase();
-  if (mode === 'haiku' || mode === 'sonnet') return mode;
+  if (mode === 'haiku' || mode === 'sonnet' || mode === 'gemini') return mode;
   return 'auto';
 }
 

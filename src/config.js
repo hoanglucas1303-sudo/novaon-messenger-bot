@@ -14,6 +14,8 @@ export const config = {
     process.env.PREMIUM_LLM_MODEL ||
     process.env.LLM_MODEL ||
     'anthropic/claude-sonnet-4.6',
+  // Nguồn rẻ khác (non-Claude) để A/B — mặc định Gemini Flash-Lite (rẻ hơn Haiku nhiều)
+  geminiModel: process.env.GEMINI_LLM_MODEL || 'google/gemini-3.5-flash-lite',
   llmMaxTokens: Number(process.env.LLM_MAX_TOKENS || 350),
 
   // URL gốc công khai (để dựng link ảnh tự host cho Messenger fetch)

@@ -236,6 +236,7 @@ function selectModel(userText, requestedMode = 'auto') {
   const mode = String(requestedMode || 'auto').toLowerCase();
   if (mode === CHEAP_MODEL_LABEL) return { model: config.llmModel, tier: CHEAP_MODEL_LABEL };
   if (mode === PREMIUM_MODEL_LABEL) return { model: config.premiumLlmModel, tier: PREMIUM_MODEL_LABEL };
+  if (mode === 'gemini') return { model: config.geminiModel, tier: 'gemini' };
 
   if (shouldUsePremium(userText)) {
     return { model: config.premiumLlmModel, tier: PREMIUM_MODEL_LABEL };
