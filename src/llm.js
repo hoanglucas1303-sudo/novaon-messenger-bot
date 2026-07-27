@@ -238,34 +238,8 @@ function selectModel(userText, requestedMode = 'auto') {
   if (mode === PREMIUM_MODEL_LABEL) return { model: config.premiumLlmModel, tier: PREMIUM_MODEL_LABEL };
   if (mode === 'gemini') return { model: config.geminiModel, tier: 'gemini' };
 
-  if (shouldUsePremium(userText)) {
-    return { model: config.premiumLlmModel, tier: PREMIUM_MODEL_LABEL };
-  }
-  return { model: config.llmModel, tier: CHEAP_MODEL_LABEL };
-}
-
-function shouldUsePremium(userText) {
-  const text = String(userText || '').toLowerCase();
-  if (text.length > 700) return true;
-  const premiumSignals = [
-    'so sánh',
-    'so sanh',
-    'khác nhau',
-    'khac nhau',
-    'nên chọn',
-    'nen chon',
-    'phù hợp nhất',
-    'phu hop nhat',
-    'đau lưng',
-    'dau lung',
-    'dị ứng',
-    'di ung',
-    'trẻ em',
-    'tre em',
-    'người già',
-    'nguoi gia',
-    'tư vấn kỹ',
-    'tu van ky',
-  ];
-  return premiumSignals.some((signal) => text.includes(signal));
+  // 'auto' (mặc định, bot Messenger dùng): Gemini Flash-Lite cho TẤT CẢ câu hỏi
+  // — chất lượng đủ tốt, chi phí rẻ nhất. Muốn escalate sang Claude thì đổi ở đây
+  // (lịch sử routing theo tín hiệu câu khó nằm trong git).
+  return { model: config.geminiModel, tier: 'gemini' };
 }
