@@ -96,7 +96,7 @@ Khi có Postgres, campaign được lưu vào bảng `campaigns`. Nếu chưa c�
 
 ## LLM Cost Strategy
 
-Mặc định chatbot dùng `CHEAP_LLM_MODEL=anthropic/claude-haiku-4.5` để giảm chi phí cho các câu hỏi tư vấn thông thường. `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6` được giữ làm model premium cho câu hỏi dài/phức tạp hoặc khi web chat được ép `?model=sonnet`.
+**Mặc định (2026-07): chatbot dùng `GEMINI_LLM_MODEL=google/gemini-3.5-flash-lite` cho TẤT CẢ câu hỏi** (đường `auto`) — chất lượng ≈ Claude mà rẻ ~10 lần so Sonnet, ~70% so Haiku. `CHEAP_LLM_MODEL=anthropic/claude-haiku-4.5` và `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6` vẫn tồn tại nhưng chỉ dùng khi ép `?model=haiku|sonnet` để A/B. Đổi model = đổi slug env (OpenRouter cắm mọi provider bằng 1 key). ⚠️ chỉ **Flash-Lite** rẻ — *full* Gemini Flash (3.6/3.5) còn đắt hơn Haiku.
 
 Chế độ `auto` sẽ dùng Sonnet khi tin nhắn có tín hiệu cần suy luận kỹ, ví dụ so sánh nhiều sản phẩm, hỏi nên chọn loại nào, đau lưng, người già/trẻ em, hoặc tin nhắn rất dài. Các câu hỏi giá, ảnh, size và xin lead thông thường chạy bằng Haiku.
 

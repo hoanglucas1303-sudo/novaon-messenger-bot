@@ -15,7 +15,7 @@ Nền tảng **chatbot AI trên Facebook Messenger** cho các **Client** của N
 1. **Cơ chế AI = Kiểu A**: human viết trước *persona + luật trả lời + câu mẫu*, bot tự chạy 100% theo đó. (Không phải duyệt-từng-tin, không phải takeover — để dành sau.)
 2. **Ảnh sản phẩm:** backend Novaon tự host ảnh (URL public) → gửi qua Messenger bằng URL. LLM tự quyết gửi ảnh nào qua "tool".
 3. **Meta:** giai đoạn đầu chạy **Development mode** (chỉ page + admin/tester) → **không cần App Review**. Chỉ nộp review `pages_messaging` khi go-live cho Client thật.
-4. **Stack:** Node + Express (backend webhook), deploy Railway. Postgres (Railway) khi cần lưu knowledge/tenant. LLM qua OpenRouter: default Haiku (`anthropic/claude-haiku-4.5`) để tiết kiệm, premium fallback Sonnet (`anthropic/claude-sonnet-4.6`) cho câu phức tạp.
+4. **Stack:** Node + Express (backend webhook), deploy Railway. Postgres (Railway) khi cần lưu knowledge/tenant. LLM qua **OpenRouter** (multi-provider: 1 key cắm Claude/Gemini/GPT). **Model mặc định (2026-07): `google/gemini-3.5-flash-lite`** cho tất cả câu hỏi (Lộc chốt sau A/B: chất lượng ≈ Claude, rẻ ~10 lần so Sonnet, ~70% so Haiku). Haiku/Sonnet giữ làm tab A/B trên web chat. ⚠️ *full* Gemini Flash (3.6/3.5) còn ĐẮT hơn Haiku — chỉ **Flash-Lite** mới rẻ.
 5. **Tầm nhìn HYBRID (bot + người):** bot lo phần lớn hành trình; ở **điểm chạm quan trọng gần cuối** thì con người quan trọng, nhưng **không phải lúc nào cũng cần người**. Cả 2 sẵn sàng, linh hoạt.
 6. **PHẠM VI v1 (Lộc chốt 2026-07-20):** bot **KHÔNG chốt đơn, KHÔNG hứa hẹn thay Sale**. Vai trò v1 = *tư vấn + gợi mở → XIN & GHI NHẬN thông tin liên hệ → để Sale tiếp nối bất cứ lúc nào*. Minh bạch 2 phía: khách biết "sẽ có nhân viên liên hệ" (trong hội thoại), quản trị thấy lead trên dashboard. Live-takeover (Handover Protocol) để dành ver sau.
 
@@ -140,7 +140,7 @@ public/infographics/ Infographic chiến lược AI Lead Conversion Layer
 - **Campaign Builder:** `/studio`, `/studio/import`, `/dashboard` mở được ngay; `/studio/demo` và `/chat/song-hong-demo` vẫn là UI/test web channel nhanh.
 - **Campaign DB:** bảng `campaigns` tự tạo khi có `DATABASE_URL`. Chưa có DB thì chỉ dùng fallback RAM, không bền sau redeploy.
 - **LeadTracker integration:** hướng sản phẩm dài hạn là đẩy lead profile sang LeadTracker/CRM. Cần làm schema lead profile v2 + `LEADTRACKER_WEBHOOK_URL`/`LEADTRACKER_API_KEY` + trạng thái sync.
-- **LLM cost strategy:** code default mới là `CHEAP_LLM_MODEL=anthropic/claude-haiku-4.5`, `PREMIUM_LLM_MODEL=anthropic/claude-sonnet-4.6`, `LLM_MAX_TOKENS=350`. Web chat test được `?model=haiku|sonnet|auto`. Biến `LLM_MODEL` cũ nếu còn trên Railway chỉ được dùng làm premium fallback, không còn ép default route sang Sonnet.
+- **LLM cost strategy (cập nhật 2026-07):** đường `auto` (bot Messenger + web chat mặc định) giờ dùng **`GEMINI_LLM_MODEL=google/gemini-3.5-flash-lite`** cho **tất cả** — `selectModel()` trong `src/llm.js` trả Gemini, đã bỏ escalation theo tín hiệu câu khó (còn trong git). Vẫn có `CHEAP_LLM_MODEL`(haiku) / `PREMIUM_LLM_MODEL`(sonnet) map vào tab A/B `?model=haiku|sonnet|gemini|auto`. `LLM_MAX_TOKENS=350`. Đổi provider chỉ cần đổi slug env (OpenRouter multi-provider). ⚠️ chỉ **Flash-Lite** rẻ; full Flash đắt hơn Haiku.
 - **Go-live:** Meta App Review xin `pages_messaging` + verify business (khi bán cho Client thật).
 
 ## Ghi chú kỹ thuật
