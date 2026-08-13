@@ -359,6 +359,9 @@ function renderPage({ title, body }) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${escapeHtml(title)} · Novaon Bot Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
         color-scheme: light;
@@ -375,7 +378,7 @@ function renderPage({ title, body }) {
         --teal-soft: #e6f4f1;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; line-height: 1.5; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', Arial, Helvetica, sans-serif; line-height: 1.5; }
       main { width: min(1180px, calc(100% - 32px)); margin: 20px auto 56px; }
       h1, h2, h3, p { margin: 0; }
       h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; max-width: 760px; }

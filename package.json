@@ -6,6 +6,7 @@
   "description": "Nền tảng chatbot AI trên Facebook Messenger cho các Client của Novaon",
   "scripts": {
     "dev": "node --watch src/index.js",
+    "dev:preview": "node --watch scripts/dev-preview.mjs",
     "start": "node src/index.js"
   },
   "engines": {

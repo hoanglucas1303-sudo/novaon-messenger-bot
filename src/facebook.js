@@ -227,55 +227,113 @@ function route(handler) {
 }
 
 // ---------------------------------------------------------------------------
-// HTML nhẹ, đồng bộ tông màu với Studio
+// HTML — tái dùng đúng khung/tông màu của Bot Studio (topbar tối, brand mark,
+// breadcrumb) để trang kết nối là một phần liền mạch của sản phẩm, không phải
+// trang tiện ích tách rời.
 // ---------------------------------------------------------------------------
-const PAGE_STYLE = `
-  :root{color-scheme:light;--bg:#f5f6f8;--surface:#fff;--text:#111318;--muted:#626873;--line:#e2e6ec;--brand:#ff5a0a;--brand-dark:#d9480f;--ink:#070707}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5;display:flex;justify-content:center;padding:40px 16px}
-  main{width:min(520px,100%)}
-  h1{font-size:22px;margin:0 0 6px}
-  p{color:var(--muted);margin:0 0 20px}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .card strong{display:block}
-  .card span{color:var(--muted);font-size:13px}
-  button{border:1px solid var(--brand);border-radius:8px;background:var(--brand);color:#fff;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer}
-  .back{display:inline-block;margin-top:16px;color:var(--brand-dark);font-weight:700;text-decoration:none}
-`;
+const AVATAR_TONES = ['#ff5a0a', '#0f766e', '#5b5bd6', '#c2410c', '#0369a1'];
+
+function avatarTone(seed) {
+  let hash = 0;
+  for (const ch of String(seed)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return AVATAR_TONES[hash % AVATAR_TONES.length];
+}
+
+function layout({ title, eyebrow, heading, subtitle, body }) {
+  return `<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${escapeHtml(title)} · Novaon Bot Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root{color-scheme:light;--bg:#f5f6f8;--surface:#fff;--text:#111318;--muted:#626873;--line:#e2e6ec;--brand:#ff5a0a;--brand-dark:#d9480f;--ink:#070707;--teal:#0f766e;--teal-soft:#e6f4f1}
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',Arial,Helvetica,sans-serif;line-height:1.5}
+      main{width:min(640px,calc(100% - 32px));margin:20px auto 56px}
+      h1,h2,p{margin:0}
+      h1{font-size:clamp(26px,4vw,34px);line-height:1.1}
+      a{color:var(--brand-dark);font-weight:700;text-decoration:none}
+      .app-nav{height:64px;display:flex;align-items:center;gap:10px}
+      .brand-mark{display:inline-flex;align-items:center;gap:10px;color:var(--text)}
+      .brand-mark span{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:800}
+      .back{display:inline-block;margin-bottom:8px;color:var(--muted);font-weight:700;font-size:13px}
+      .topbar{padding:30px 32px;border-radius:8px;border:1px solid #15171c;color:#fff;margin-bottom:16px;
+        background:radial-gradient(65% 90% at 88% 120%,rgb(255 90 10 / .72),transparent 60%),linear-gradient(135deg,#070707 0%,#111318 58%,#201008 100%)}
+      .topbar .eyebrow{color:#ffb088;font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:.08em;margin-bottom:8px}
+      .topbar p{color:#d8dde6;margin-top:10px;max-width:520px}
+      section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;margin-bottom:16px}
+      .page-row{display:flex;align-items:center;gap:14px;padding:14px 12px;border-bottom:1px solid var(--line)}
+      .page-row:last-child{border-bottom:0}
+      .avatar{width:40px;height:40px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px}
+      .page-row strong{display:block;font-size:15px}
+      .page-row .muted{color:var(--muted);font-size:12px}
+      .page-row form{margin-left:auto}
+      button,.button{border:1px solid var(--brand);border-radius:8px;background:var(--brand);color:#fff;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer}
+      .notice-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:22px}
+      .notice-card p{color:var(--muted);margin-top:8px}
+      .notice-card.error{border-color:#ffd1b8;background:#fff7f3}
+      @media (max-width:600px){ main{margin-top:12px} .topbar{padding:22px} }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav class="app-nav">
+        <a class="brand-mark" href="/dashboard"><span>NB</span> Novaon Bot Studio</a>
+      </nav>
+      <header class="topbar">
+        <p class="eyebrow">${escapeHtml(eyebrow || 'Kết nối Trang Facebook')}</p>
+        <h1>${escapeHtml(heading)}</h1>
+        ${subtitle ? `<p>${subtitle}</p>` : ''}
+      </header>
+      ${body}
+    </main>
+  </body>
+</html>`;
+}
 
 function renderPickerPage({ pages, pickToken, campaignSlug }) {
   const items = pages
     .map(
       (p) => `
-      <form class="card" method="post" action="/oauth/facebook/select">
-        <input type="hidden" name="pick" value="${escapeHtml(pickToken)}">
-        <input type="hidden" name="pageId" value="${escapeHtml(p.id)}">
-        <div><strong>${escapeHtml(p.name)}</strong><span>ID: ${escapeHtml(p.id)}</span></div>
-        <button type="submit">Kết nối</button>
-      </form>`
+      <div class="page-row">
+        <div class="avatar" style="background:${avatarTone(p.id)}">${escapeHtml((p.name || '?').trim().charAt(0).toUpperCase())}</div>
+        <div><strong>${escapeHtml(p.name)}</strong><span class="muted">ID: ${escapeHtml(p.id)}</span></div>
+        <form method="post" action="/oauth/facebook/select">
+          <input type="hidden" name="pick" value="${escapeHtml(pickToken)}">
+          <input type="hidden" name="pageId" value="${escapeHtml(p.id)}">
+          <button type="submit">Kết nối</button>
+        </form>
+      </div>`
     )
     .join('');
 
-  return `<!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chọn Trang Facebook</title><style>${PAGE_STYLE}</style></head>
-<body><main>
-  <h1>Chọn Trang để kết nối</h1>
-  <p>Chọn Trang Facebook muốn gắn với campaign <strong>${escapeHtml(campaignSlug)}</strong>. Hệ thống sẽ tự đăng ký webhook cho Trang này.</p>
-  ${items}
-  <a class="back" href="/studio/campaigns/${escapeHtml(campaignSlug)}/edit">← Huỷ, quay lại</a>
-</main></body></html>`;
+  return layout({
+    title: 'Chọn Trang Facebook',
+    heading: 'Chọn Trang để kết nối',
+    subtitle: `Đây là các Trang bạn đang quản lý trên Facebook. Chọn đúng Trang muốn gắn với dự án <strong>${escapeHtml(campaignSlug)}</strong> — hệ thống sẽ tự đăng ký webhook cho Trang này, không cần vào console Meta.`,
+    body: `
+      <a class="back" href="/studio/campaigns/${escapeHtml(campaignSlug)}/edit">← Huỷ, quay lại cấu hình dự án</a>
+      <section>${items}</section>
+    `,
+  });
 }
 
-function renderMessage(title, detail) {
-  return `<!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(title)}</title><style>${PAGE_STYLE}</style></head>
-<body><main>
-  <h1>${escapeHtml(title)}</h1>
-  <p>${escapeHtml(String(detail || ''))}</p>
-  <a class="back" href="/studio">← Quay lại Campaigns</a>
-</main></body></html>`;
+function renderMessage(title, detail, { tone = 'error', backHref = '/studio', backLabel = '← Quay lại Campaigns' } = {}) {
+  return layout({
+    title,
+    eyebrow: tone === 'error' ? 'Không thể kết nối' : 'Kết nối Trang Facebook',
+    heading: title,
+    body: `
+      <div class="notice-card ${tone === 'error' ? 'error' : ''}">
+        <p>${escapeHtml(String(detail || ''))}</p>
+      </div>
+      <p style="margin-top:14px"><a href="${escapeHtml(backHref)}">${escapeHtml(backLabel)}</a></p>
+    `,
+  });
 }
 
 function escapeHtml(value) {

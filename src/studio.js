@@ -254,7 +254,7 @@ function renderCampaignForm(campaign, options = {}) {
         ${renderFacebookConnections(pageConnections)}
         ${
           isSaved
-            ? `<a class="button secondary" href="/oauth/facebook/connect?campaign=${encodeURIComponent(campaign.slug)}">+ Kết nối với Facebook</a>`
+            ? `<a class="button facebook" href="/oauth/facebook/connect?campaign=${encodeURIComponent(campaign.slug)}"><img src="/assets/brand/facebook-logo.png" alt=""> Kết nối với Facebook</a>`
             : '<p class="muted">Lưu campaign trước, sau đó quay lại đây để kết nối Trang.</p>'
         }
       </section>
@@ -318,6 +318,9 @@ function renderStudioPage({ title, body }) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${escapeHtml(title)} · Novaon Bot Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
         color-scheme: light;
@@ -333,7 +336,7 @@ function renderStudioPage({ title, body }) {
         --teal-soft: #e6f4f1;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, Helvetica, sans-serif; line-height: 1.5; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', Arial, Helvetica, sans-serif; line-height: 1.5; }
       main { width: min(1180px, calc(100% - 32px)); margin: 20px auto 56px; }
       h1, h2, p { margin: 0; }
       h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.02; }
@@ -361,9 +364,12 @@ function renderStudioPage({ title, body }) {
       .topbar p { color: #d8dde6; margin-top: 10px; max-width: 760px; }
       .muted { color: var(--muted); }
       .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-      .button, button { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; border: 1px solid var(--brand); border-radius: 8px; background: var(--brand); color: #fff; padding: 10px 14px; font: inherit; font-weight: 800; cursor: pointer; }
+      .button, button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; border: 1px solid var(--brand); border-radius: 8px; background: var(--brand); color: #fff; padding: 10px 14px; font: inherit; font-weight: 800; cursor: pointer; }
       .button.secondary { background: var(--surface); color: var(--brand-dark); border-color: var(--line); }
       .topbar .button.secondary { background: rgb(255 255 255 / .1); color: #fff; border-color: rgb(255 255 255 / .25); }
+      .button.facebook { background: #1877f2; border-color: #1877f2; color: #fff; }
+      .button.facebook:hover { background: #166fe5; border-color: #166fe5; }
+      .button.facebook img { width: 20px; height: 20px; display: block; }
       .back { display: inline-block; margin-bottom: 8px; }
       .notice { background: #fff1e8; color: var(--brand-dark); border: 1px solid #ffd1b8; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-weight: 800; }
       section, table { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
@@ -379,7 +385,7 @@ function renderStudioPage({ title, body }) {
       th { color: var(--muted); font-size: 13px; }
       tr:last-child td { border-bottom: 0; }
       label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 700; }
-      input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; color: var(--text); font: inherit; background: #fff; }
+      input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; color: var(--text); font: inherit; font-size: 14px; background: #fff; }
       textarea { resize: vertical; }
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
       .checkbox { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
@@ -409,6 +415,9 @@ function renderChatPage(campaign, modelMode = 'auto') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${escapeHtml(campaign.name)} · Web Chat Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
         color-scheme: light;
@@ -421,7 +430,7 @@ function renderChatPage(campaign, modelMode = 'auto') {
         --soft: #e6f4f1;
       }
       * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; background: linear-gradient(135deg, #f5f7fa 0%, #fff7ed 100%); color: var(--text); font-family: Arial, Helvetica, sans-serif; }
+      body { margin: 0; min-height: 100vh; background: linear-gradient(135deg, #f5f7fa 0%, #fff7ed 100%); color: var(--text); font-family: 'Inter', Arial, Helvetica, sans-serif; }
       .shell { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; width: min(940px, 100%); margin: 0 auto; background: var(--surface); border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
       header { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; align-items: center; background: #070707; color: #fff; }
       h1, p { margin: 0; }
