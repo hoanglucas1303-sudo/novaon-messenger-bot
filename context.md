@@ -65,7 +65,8 @@ Hướng triển khai tiếp theo:
 - [x] **Phase 0 — Xương sống:** webhook verify + echo. Backend Express. ✅ VERIFIED 2026-07-20 (echo chạy thật trên page Nobo AI).
 - [x] **Phase 1 — Trả lời bằng AI (A):** knowledge (persona+luật+catalog Sông Hồng) → LLM (OpenRouter). ✅ VERIFIED 2026-07-20.
 - [x] **Phase 2 — Gửi ảnh:** LLM chèn dấu `##IMG:<id>` → backend gửi ảnh sản phẩm. ✅ VERIFIED 2026-07-20 (ảnh hiện thật trên Messenger).
-- [ ] **➡️ ĐANG LÀM — Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** Code đã implement 2026-07-20; chờ gắn Railway Postgres rồi test thật trên Messenger để verify. Dashboard/studio/import mở mặc định cho sample; bật khóa bằng `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD` khi có dữ liệu khách thật.
+- [x] **Lát cắt #1: DB + Lead capture ("ghi nhận") + trang xem lead.** ✅ Postgres đã gắn (2026-08) + **VERIFIED THẬT**: gửi tin có SĐT qua `/api/chat` → lead hiện thật trên `/leads`. ✅ **Đã khóa** `DASHBOARD_LOCKED=true` — verified 401 không auth / 200 có auth đúng. User `novaon`, password Lộc lưu riêng (Claude đã sinh + set trên Railway, không lưu plaintext trong repo).
+- [ ] **➡️ ĐANG LÀM — Giai đoạn A: "Kết nối Trang Facebook" bằng Facebook Login thật trong dashboard.** Thay việc gõ tay Page ID → OAuth chọn Trang (dùng `pages_show_list` thật) → tự đăng ký webhook (`pages_manage_metadata` thật) → lưu Page Access Token theo từng Campaign trong DB. Mục đích kép: (1) cảnh quay App Review thật thay vì console Meta, (2) nền multi-tenant SaaS. Token lưu theo Campaign trong Postgres (Lộc chốt 2026-08).
 - [ ] **➡️ ĐANG MỞ RỘNG — Platform foundation: Campaign Builder + Web Chat Test.** Code đã implement 2026-07-20: `/studio`, `/studio/demo`, `/chat/:slug`, `/api/chat`, campaign store DB/fallback. Mục tiêu: tạo campaign, nạp hướng dẫn chatbot, test full flow trên web FE và Messenger.
 - [ ] **Phase 3 — RAG thật:** pgvector + tìm kiếm ngữ nghĩa (brainstorm thêm).
 - [ ] **Phase 4 — Dashboard quản trị data:** persona/luật/catalog/ảnh (chuyển knowledge.js → DB) + xem lead + multi-tenant.
@@ -85,7 +86,7 @@ Hiện thực Quyết định #5–#6. Làm theo thứ tự, dừng review từn
 
 **Phase 0-1-2 — XONG & verified thật (2026-07-20).** Bot Nobo AI: tư vấn AI (persona+luật+catalog Sông Hồng) + gửi ảnh. Đủ 3 tính năng lõi brief. Giọng bot đã chỉnh về hướng "xin thông tin cho Sale, không tự chốt".
 
-**Lát cắt #1 — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Postgres `leads`, marker `##LEAD:{...}`, lưu lead sau khi bot trả lời, mini dashboard thật `/leads`, và dashboard demo `/leads/demo` bằng dữ liệu mẫu đã che SĐT. Cần set `DATABASE_URL` trên Railway rồi test lead thật bằng Messenger; khi có dữ liệu thật nên bật `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD`.
+**Lát cắt #1 — XONG & VERIFIED THẬT (2026-08).** Postgres đã gắn (`DATABASE_URL=${{Postgres.DATABASE_URL}}`), lead capture chạy thật qua marker `##LEAD:{...}`, `/leads` hiện đúng lead thật (test: SĐT 0988112233 → xuất hiện trên `/leads`). Campaign cũng lưu bền qua Postgres. ⚠️ **CHƯA khóa `/leads`** — cần `DASHBOARD_LOCKED=true` + `DASHBOARD_PASSWORD` gấp vì đã có SĐT khách thật.
 
 **Platform foundation — CODE IMPLEMENTED (2026-07-20), CHƯA VERIFY THẬT.** Đã thêm Campaign Builder `/studio`, GUI demo `/studio/demo`, web chat public `/chat/song-hong-demo`, API `/api/chat`. Campaign là brain dùng chung cho Messenger + Web Chat. Messenger map campaign bằng Page ID (`event.recipient.id`). Nếu chưa có DB, app dùng campaign Sông Hồng fallback trong RAM; dùng thật cần Railway Postgres.
 
@@ -125,8 +126,8 @@ public/infographics/ Infographic chiến lược AI Lead Conversion Layer
 - **GitHub:** `hoanglucas1303-sudo/novaon-messenger-bot` (branch `main`, Railway auto-deploy).
 - **Railway:** project **zealous-stillness** › service **novaon-messenger-bot**.
   - URL: `https://novaon-messenger-bot-production.up.railway.app` — webhook `/webhook`.
-  - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN=novaon-messenger-verify-2026`, `LLM_MODEL=anthropic/claude-sonnet-4.6` (nên đổi sang `anthropic/claude-haiku-4.5`), `OPENROUTER_API_KEY` (key Future Content, Lộc dán tay).
-  - Env CHƯA set: `APP_SECRET` (verify chữ ký — hardening sau), `PUBLIC_BASE_URL` (mặc định = URL Railway), `DATABASE_URL` (cần cho lead capture), `DASHBOARD_LOCKED`/`DASHBOARD_PASSWORD` (chỉ cần khi muốn khóa dashboard thật).
+  - Env đã set: `PAGE_ACCESS_TOKEN`, `VERIFY_TOKEN`, `OPENROUTER_API_KEY`, `CHEAP_LLM_MODEL`(haiku)/`PREMIUM_LLM_MODEL`(sonnet)/`GEMINI_LLM_MODEL`(mặc định, xem Quyết định #4), **`DATABASE_URL`** (gắn 2026-08, Postgres service riêng trong project, `${{Postgres.DATABASE_URL}}`).
+  - Env CHƯA set: `APP_SECRET` (hardening), **`DASHBOARD_LOCKED`/`DASHBOARD_PASSWORD`** (⚠️ ưu tiên cao — `/leads` đang mở public với SĐT khách thật).
 - **Meta App:** "Novaon Chatbot", **App ID `37150034544642460`** (Business, use case "Tương tác với khách hàng trên Messenger"). Đang **Development mode**.
 - **Fanpage test:** **Nobo Ai** — Page ID `1220791817792373` (profile URL `facebook.com/profile.php?id=61592078012566`). Webhook subscribe: `messages`, `messaging_postbacks`.
 - Token đưa vào Railway do **Lộc dán tay** (credential — Claude không nhập/đọc token).
