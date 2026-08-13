@@ -212,9 +212,12 @@ export function mountFacebookOAuth(app) {
         pageAccessToken: page.access_token,
         campaignSlug: pending.campaignSlug,
       });
-      await addPageIdToCampaign(pending.campaignSlug, page.id);
+      // Route /studio/campaigns/:id/edit cần ID SỐ của campaign, không phải slug —
+      // addPageIdToCampaign trả về campaign (đã có .id) dù có lưu lại hay không.
+      const updatedCampaign = await addPageIdToCampaign(pending.campaignSlug, page.id);
+      const redirectId = updatedCampaign?.id ?? pending.campaignSlug;
 
-      res.redirect(`/studio/campaigns/${pending.campaignSlug}/edit?fbConnected=${encodeURIComponent(page.name)}`);
+      res.redirect(`/studio/campaigns/${redirectId}/edit?fbConnected=${encodeURIComponent(page.name)}`);
     } catch (e) {
       console.error('[facebook] Lỗi hoàn tất kết nối:', e);
       res.status(500).send(renderMessage('Có lỗi xảy ra', 'Vui lòng thử lại.'));
