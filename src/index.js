@@ -10,6 +10,7 @@ import { mountUnifiedDashboard } from './unified-dashboard.js';
 import { mountStudio } from './studio.js';
 import { mountImportCenter } from './import-center.js';
 import { mountMediaRoutes } from './media.js';
+import { mountFacebookOAuth, initPageConnections, getPageConnectionByPageId } from './facebook.js';
 import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
 
@@ -44,6 +45,7 @@ mountUnifiedDashboard(app);
 mountDashboard(app);
 mountStudio(app);
 mountImportCenter(app);
+mountFacebookOAuth(app);
 
 // --- Xác minh webhook (Meta gọi 1 lần khi cấu hình) ---
 app.get('/webhook', (req, res) => {
@@ -84,20 +86,25 @@ async function handleEvent(event) {
   const senderId = event.sender?.id;
   if (!senderId) return;
 
+  const pageId = event.recipient?.id;
+  // Multi-tenant: mỗi Trang có Page Access Token riêng (kết nối qua Facebook Login).
+  // Chưa kết nối qua luồng mới thì fallback về PAGE_ACCESS_TOKEN trong env (Trang test cũ).
+  const connection = await getPageConnectionByPageId(pageId);
+  const pageToken = connection?.page_access_token;
+
   // Phase 1+2: trả lời bằng AI (persona + luật + knowledge) và gửi ảnh khi cần.
   if (event.message?.text) {
     const text = event.message.text;
-    const pageId = event.recipient?.id;
     const campaign = await findCampaignByPageId(pageId);
     console.log(`[msg] ${senderId}: ${text}`);
-    await sendTypingOn(senderId);
+    await sendTypingOn(senderId, pageToken);
     const { text: reply, images, lead, conversation, modelTier } = await generateReply(senderId, text, {
       campaign,
       conversationKey: `messenger:${campaign.slug}:${senderId}`,
       modelMode: 'auto',
     });
-    await sendText(senderId, reply);
-    if (images.length) await sendImages(senderId, images);
+    await sendText(senderId, reply, pageToken);
+    if (images.length) await sendImages(senderId, images, pageToken);
     if (lead) {
       const savedLead = await createLead({
         campaignId: campaign.slug,
@@ -113,9 +120,9 @@ async function handleEvent(event) {
       `[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}${lead ? ' (+lead)' : ''}${modelTier ? ` (${modelTier})` : ''}`
     );
   } else if (event.message?.attachments) {
-    await sendText(senderId, 'Mình đã nhận được tệp đính kèm của bạn 👍');
+    await sendText(senderId, 'Mình đã nhận được tệp đính kèm của bạn 👍', pageToken);
   } else if (event.postback) {
-    await sendText(senderId, `Bạn vừa bấm: ${event.postback.title || event.postback.payload}`);
+    await sendText(senderId, `Bạn vừa bấm: ${event.postback.title || event.postback.payload}`, pageToken);
   }
 }
 
@@ -135,6 +142,7 @@ function verifySignature(req) {
 try {
   await initDatabase();
   await initCampaignStore();
+  await initPageConnections();
 } catch (e) {
   console.error('[boot] Không khởi tạo được DB/campaign store:', e);
 }

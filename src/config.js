@@ -5,6 +5,8 @@ export const config = {
   pageAccessToken: process.env.PAGE_ACCESS_TOKEN || '',
   verifyToken: process.env.VERIFY_TOKEN || 'novaon-messenger-verify-2026',
   appSecret: process.env.APP_SECRET || '',
+  // App ID là thông tin công khai (đã lộ trong URL webhook/OAuth) — an toàn để hardcode default
+  metaAppId: process.env.META_APP_ID || '37150034544642460',
   graphApiVersion: 'v21.0',
 
   // LLM (Phase 1+)

@@ -10,6 +10,7 @@ import {
 } from './campaigns.js';
 import { createLead } from './db.js';
 import { generateReply } from './llm.js';
+import { listPageConnectionsForCampaign } from './facebook.js';
 
 export function mountStudio(app) {
   app.get('/studio/demo', (_req, res) => {
@@ -55,6 +56,7 @@ export function mountStudio(app) {
     if (!ensureStudioUnlocked(res)) return;
     const campaign = await getCampaignById(req.params.id);
     if (!campaign) return res.status(404).send('Campaign not found');
+    const pageConnections = await listPageConnectionsForCampaign(campaign.slug);
     res.type('html').send(
       renderStudioPage({
         title: campaign.name,
@@ -62,6 +64,8 @@ export function mountStudio(app) {
           action: '/studio/campaigns',
           title: `Cấu hình ${campaign.name}`,
           saved: req.query.saved === '1',
+          fbConnected: req.query.fbConnected || '',
+          pageConnections,
         }),
       })
     );
@@ -193,6 +197,8 @@ function renderCampaignList(campaigns) {
 
 function renderCampaignForm(campaign, options = {}) {
   const pageIds = campaign.page_ids.join('\n');
+  const pageConnections = options.pageConnections || [];
+  const isSaved = Boolean(campaign.id) && !options.demo;
   return `
     <nav class="app-nav">
       <a class="brand-mark" href="/dashboard"><span>ST</span> Bot Studio</a>
@@ -218,6 +224,7 @@ function renderCampaignForm(campaign, options = {}) {
       </div>
     </header>
     ${options.saved ? '<p class="notice">Đã lưu campaign.</p>' : ''}
+    ${options.fbConnected ? `<p class="notice">Đã kết nối Trang Facebook "${escapeHtml(options.fbConnected)}" ✅</p>` : ''}
     <section class="help-strip">
       <article><strong>Thông tin</strong><span>Định danh dự án và kênh Messenger.</span></article>
       <article><strong>Hành vi</strong><span>Persona + luật để kiểm soát giọng bot.</span></article>
@@ -234,9 +241,22 @@ function renderCampaignForm(campaign, options = {}) {
           <label>Tên campaign<input name="name" value="${escapeHtml(campaign.name)}"></label>
           <label>Slug public<input name="slug" value="${escapeHtml(campaign.slug)}"></label>
           <label>Brand / Client<input name="brandName" value="${escapeHtml(campaign.brand_name || '')}"></label>
-          <label>Page ID Messenger<textarea name="pageIds" rows="3">${escapeHtml(pageIds)}</textarea></label>
+          <label>Page ID Messenger (thủ công / nâng cao)<textarea name="pageIds" rows="3">${escapeHtml(pageIds)}</textarea></label>
         </div>
         <label class="checkbox"><input type="checkbox" name="active" ${campaign.active ? 'checked' : ''}> Active</label>
+      </section>
+
+      <section>
+        <div class="section-title">
+          <h2>Kết nối Trang Facebook</h2>
+          <p>Kết nối thật qua Facebook Login — hệ thống tự lấy Page Access Token và tự đăng ký webhook cho Trang, không cần vào console Meta.</p>
+        </div>
+        ${renderFacebookConnections(pageConnections)}
+        ${
+          isSaved
+            ? `<a class="button secondary" href="/oauth/facebook/connect?campaign=${encodeURIComponent(campaign.slug)}">+ Kết nối với Facebook</a>`
+            : '<p class="muted">Lưu campaign trước, sau đó quay lại đây để kết nối Trang.</p>'
+        }
       </section>
 
       <section>
@@ -272,6 +292,23 @@ function renderCampaignForm(campaign, options = {}) {
       </section>
     </form>
   `;
+}
+
+function renderFacebookConnections(pageConnections) {
+  if (!pageConnections.length) {
+    return '<p class="muted" style="margin-bottom:12px">Chưa kết nối Trang nào qua Facebook Login.</p>';
+  }
+  const rows = pageConnections
+    .map(
+      (p) => `
+      <tr>
+        <td><strong>${escapeHtml(p.page_name || 'Không rõ tên')}</strong><br><span class="muted">ID: ${escapeHtml(p.page_id)}</span></td>
+        <td><span class="pill active">Đã kết nối</span></td>
+        <td class="muted">${new Date(p.connected_at).toLocaleString('vi-VN')}</td>
+      </tr>`
+    )
+    .join('');
+  return `<table style="margin-bottom:12px"><tbody>${rows}</tbody></table>`;
 }
 
 function renderStudioPage({ title, body }) {
