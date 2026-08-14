@@ -52,20 +52,6 @@ export function mountStudio(app) {
     res.redirect(`/studio/campaigns/${campaign.id}/edit?saved=1`);
   }));
 
-  // Dọn 1 lần: gỡ ảnh placeholder màu (*-1.png) còn sót trong catalog đã lưu DB —
-  // chỉ sửa field images, giữ nguyên mọi field khác của campaign. Xoá route này
-  // sau khi chạy xong.
-  app.post('/studio/campaigns/:id/strip-placeholder-images', requireAdminAuth, route(async (req, res) => {
-    const campaign = await getCampaignById(req.params.id);
-    if (!campaign) return res.status(404).send('Campaign not found');
-    const products = (campaign.products || []).map((p) => ({
-      ...p,
-      images: (p.images || []).filter((url) => !/-1\.png(\?|$)/.test(url)),
-    }));
-    const updated = await saveCampaign({ ...campaign, products, id: campaign.id, pageIds: (campaign.page_ids || []).join(',') });
-    res.json({ ok: true, products: updated.products.map((p) => ({ id: p.id, images: p.images })) });
-  }));
-
   app.get('/studio/campaigns/:id/edit', requireAdminAuth, route(async (req, res) => {
     if (!ensureStudioUnlocked(res)) return;
     const campaign = await getCampaignById(req.params.id);
