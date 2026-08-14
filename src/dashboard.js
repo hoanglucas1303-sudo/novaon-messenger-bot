@@ -1,6 +1,6 @@
 import { config } from './config.js';
 import { requireAdminAuth } from './auth.js';
-import { getLead, hasDatabase, listLeads, updateLeadStatus } from './db.js';
+import { deleteLead, getLead, hasDatabase, listLeads, updateLead, updateLeadStatus } from './db.js';
 
 export function mountDashboard(app) {
   app.get('/leads/demo', (req, res) => {
@@ -46,6 +46,24 @@ export function mountDashboard(app) {
       return res.status(400).send('Invalid status');
     }
     res.redirect(`/leads/${req.params.id}`);
+  }));
+
+  app.post('/leads/:id/edit', requireAdminAuth, route(async (req, res) => {
+    if (!ensureDashboardReady(res)) return;
+    const updated = await updateLead(req.params.id, {
+      customerName: req.body.customerName,
+      phone: req.body.phone,
+      productInterest: req.body.productInterest,
+      note: req.body.note,
+    });
+    if (!updated) return res.status(404).send('Lead not found');
+    res.redirect(`/leads/${req.params.id}`);
+  }));
+
+  app.post('/leads/:id/delete', requireAdminAuth, route(async (req, res) => {
+    if (!ensureDashboardReady(res)) return;
+    await deleteLead(req.params.id);
+    res.redirect('/leads');
   }));
 }
 
@@ -208,15 +226,48 @@ function renderLeadDetail(lead, options = {}) {
       }
     </header>
 
-    <section class="detail">
-      <dl>
-        <div><dt>Tên</dt><dd>${escapeHtml(lead.customer_name || 'Chưa có')}</dd></div>
-        <div><dt>SĐT</dt><dd>${escapeHtml(lead.phone)}</dd></div>
-        <div><dt>Sản phẩm quan tâm</dt><dd>${escapeHtml(lead.product_interest || 'Chưa rõ')}</dd></div>
-        <div><dt>Nhu cầu/Ghi chú</dt><dd>${escapeHtml(lead.note || 'Chưa có')}</dd></div>
-        <div><dt>Sender ID</dt><dd>${escapeHtml(lead.sender_id)}</dd></div>
-      </dl>
-    </section>
+    ${
+      canEdit
+        ? `
+          <section class="detail">
+            <dl>
+              <div><dt>Sender ID</dt><dd>${escapeHtml(lead.sender_id)}</dd></div>
+              <div><dt>Đã đẩy sang OnLead</dt><dd>${lead.pushed_to_onlead_at ? formatDate(lead.pushed_to_onlead_at) : 'Chưa'}</dd></div>
+            </dl>
+          </section>
+
+          <section class="detail">
+            <h2>Sửa thông tin lead</h2>
+            <form method="post" action="${basePath}/${lead.id}/edit" class="edit-form">
+              <label>Tên<input name="customerName" value="${escapeHtml(lead.customer_name || '')}"></label>
+              <label>SĐT<input name="phone" value="${escapeHtml(lead.phone || '')}" required></label>
+              <label>Sản phẩm quan tâm<input name="productInterest" value="${escapeHtml(lead.product_interest || '')}"></label>
+              <label>Nhu cầu/Ghi chú<textarea name="note" rows="3">${escapeHtml(lead.note || '')}</textarea></label>
+              <button type="submit">Lưu thay đổi</button>
+            </form>
+          </section>
+
+          <section class="detail actions-row">
+            <button type="button" class="button ghost" title="Sắp có — sẽ đẩy lead này sang OnLead để quản lý tiếp" disabled>
+              Đẩy sang OnLead (sắp có)
+            </button>
+            <form method="post" action="${basePath}/${lead.id}/delete" onsubmit="return confirm('Xoá hẳn lead #${lead.id}? Không thể hoàn tác.');">
+              <button type="submit" class="button danger">Xoá lead</button>
+            </form>
+          </section>
+        `
+        : `
+          <section class="detail">
+            <dl>
+              <div><dt>Tên</dt><dd>${escapeHtml(lead.customer_name || 'Chưa có')}</dd></div>
+              <div><dt>SĐT</dt><dd>${escapeHtml(lead.phone)}</dd></div>
+              <div><dt>Sản phẩm quan tâm</dt><dd>${escapeHtml(lead.product_interest || 'Chưa rõ')}</dd></div>
+              <div><dt>Nhu cầu/Ghi chú</dt><dd>${escapeHtml(lead.note || 'Chưa có')}</dd></div>
+              <div><dt>Sender ID</dt><dd>${escapeHtml(lead.sender_id)}</dd></div>
+            </dl>
+          </section>
+        `
+    }
 
     <section>
       <h2>Ngữ cảnh hội thoại</h2>
@@ -359,6 +410,52 @@ function renderPage({ title, body }) {
         display: flex;
         gap: 8px;
         align-items: center;
+      }
+      .edit-form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .edit-form label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .edit-form input, .edit-form textarea {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 10px;
+        font: inherit;
+        font-size: 14px;
+        color: var(--text);
+        font-weight: 400;
+      }
+      .edit-form button { align-self: flex-start; }
+      .actions-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .button.ghost {
+        border-color: var(--line);
+        background: var(--surface);
+        color: var(--muted);
+      }
+      .button.ghost:disabled {
+        cursor: not-allowed;
+        opacity: .6;
+      }
+      .button.danger {
+        border-color: #fda29b;
+        background: #fff7f6;
+        color: #b42318;
+      }
+      .button.danger:hover {
+        background: #fee4e2;
       }
       dl {
         display: grid;

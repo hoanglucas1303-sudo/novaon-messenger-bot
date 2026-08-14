@@ -64,6 +64,10 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS leads_channel_idx ON leads (channel);
   `);
 
+  // Chỗ trống sẵn cho tích hợp OnLead sau này (đẩy lead sang OnLead quản lý tiếp) —
+  // chưa có luồng thật, chỉ chuẩn bị cột để khỏi phải migrate lại lúc làm.
+  await db.query(`ALTER TABLE leads ADD COLUMN IF NOT EXISTS pushed_to_onlead_at TIMESTAMPTZ;`);
+
   // Lead là CHẮT LỌC từ 1 luồng chat, không phải sự kiện độc lập — "cha" của lead
   // luôn là luồng chat (conversation_key, định danh theo FB PSID/session). 1 luồng
   // chat chỉ tạo ra ĐÚNG 1 lead; khách nhắn lại nhiều lần / cung cấp lại SĐT chỉ
@@ -199,6 +203,37 @@ export async function updateLeadStatus(id, status) {
     [id, status]
   );
   return result.rows[0] || null;
+}
+
+// Sửa tay thông tin lead (Sale gõ nhầm SĐT, bổ sung tên, chỉnh ghi chú...).
+// Không cho xoá trắng SĐT (NOT NULL ở schema + là khoá liên hệ) — SĐT mới
+// không hợp lệ thì giữ nguyên SĐT cũ thay vì lưu rỗng.
+export async function updateLead(id, fields) {
+  const db = getPool();
+  if (!db) return null;
+  const normalized = normalizeLead(fields);
+
+  const result = await db.query(
+    `
+      UPDATE leads SET
+        customer_name = $2,
+        phone = COALESCE(NULLIF($3, ''), phone),
+        product_interest = $4,
+        note = $5,
+        updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+    `,
+    [id, normalized.customerName || null, normalized.phone, normalized.productInterest || null, normalized.note || null]
+  );
+  return result.rows[0] || null;
+}
+
+export async function deleteLead(id) {
+  const db = getPool();
+  if (!db) return false;
+  const result = await db.query('DELETE FROM leads WHERE id = $1', [id]);
+  return result.rowCount > 0;
 }
 
 function normalizeLead(lead = {}) {
