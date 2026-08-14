@@ -64,6 +64,37 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS leads_channel_idx ON leads (channel);
   `);
   console.log('[db] Bảng leads sẵn sàng ✅');
+
+  // Lịch sử hội thoại — lưu để sống sót qua redeploy (Railway build lại là RAM mất sạch).
+  // RAM (llm.js) vẫn là cache chính lúc chạy, DB chỉ là nơi nạp lại lúc cold start.
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS conversations (
+      conversation_key TEXT PRIMARY KEY,
+      history JSONB NOT NULL DEFAULT '[]'::jsonb,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  console.log('[db] Bảng conversations sẵn sàng ✅');
+}
+
+export async function loadConversation(conversationKey) {
+  const db = getPool();
+  if (!db) return null;
+  const result = await db.query('SELECT history FROM conversations WHERE conversation_key = $1', [conversationKey]);
+  return result.rows[0]?.history ?? null;
+}
+
+export async function saveConversation(conversationKey, history) {
+  const db = getPool();
+  if (!db) return;
+  await db.query(
+    `
+      INSERT INTO conversations (conversation_key, history, updated_at)
+      VALUES ($1, $2::jsonb, NOW())
+      ON CONFLICT (conversation_key) DO UPDATE SET history = EXCLUDED.history, updated_at = NOW()
+    `,
+    [conversationKey, JSON.stringify(history || [])]
+  );
 }
 
 export async function createLead({ campaignId, pageId, senderId, channel = 'messenger', lead, conversation }) {

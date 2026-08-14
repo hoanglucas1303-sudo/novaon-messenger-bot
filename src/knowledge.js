@@ -64,7 +64,6 @@ export const products = [
     images: [
       remoteImg('https://songhonghanoi.vn/media/product/31______m_b__ng___p_s__ng_h___ng_v____g___m.jpg'),
       remoteImg('https://demxanh.com/media/product/1997_dem_bong_ep_song_hong_vo_gam__2_.jpg'),
-      img('bong-ep-1.png'),
     ],
   },
   {
@@ -89,7 +88,6 @@ export const products = [
     images: [
       remoteImg('https://songhonghanoi.vn/media/product/32________m_si__u_n___y_m___i.jpg'),
       remoteImg('https://demxanh.com/media/product/3103_10.jpg'),
-      img('sieu-nay-1.png'),
     ],
   },
   {
@@ -114,7 +112,6 @@ export const products = [
     images: [
       remoteImg('https://songhonghanoi.vn/media/product/1182______m_back_essential.jpg'),
       remoteImg('https://demxanh.com/media/product/4916_dem_bong_ep_song_hong_cao_cap_backessential__1_.jpg'),
-      img('back-essential-1.png'),
     ],
   },
   {
@@ -138,7 +135,6 @@ export const products = [
     images: [
       remoteImg('https://product.hstatic.net/200000485279/product/1_c32dd0dd5bea49559c5995844461db9a_grande.jpg'),
       remoteImg('https://songhonghanoi.vn/media/product/1373_untitled_1_ut23028.jpg'),
-      img('chan-ga-goi-1.png'),
     ],
   },
 ];

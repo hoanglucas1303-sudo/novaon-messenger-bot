@@ -1,6 +1,7 @@
 import { config } from './config.js';
 import { brand, products } from './knowledge.js';
 import { campaignToPromptData, defaultCampaign } from './campaigns.js';
+import { hasDatabase, loadConversation, saveConversation } from './db.js';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const CHEAP_MODEL_LABEL = 'haiku';
@@ -139,13 +140,25 @@ function extractLead(reply) {
   }
 }
 
-// Bộ nhớ hội thoại ngắn hạn trong RAM (reset khi redeploy) — đủ cho MVP
+// Bộ nhớ hội thoại: RAM là cache chính lúc chạy (nhanh, đủ cho MVP), có Postgres
+// thì nạp lại từ DB lúc cold start (mới thấy conversationKey lần đầu trong process
+// này) để không mất lịch sử mỗi lần Railway redeploy — trước đây RAM mất sạch.
 const histories = new Map();
 const MAX_TURNS = 8; // giữ tối đa 8 lượt (4 cặp hỏi–đáp)
 
-function getHistory(conversationKey) {
-  if (!histories.has(conversationKey)) histories.set(conversationKey, []);
-  return histories.get(conversationKey);
+async function getHistory(conversationKey) {
+  if (histories.has(conversationKey)) return histories.get(conversationKey);
+
+  let history = [];
+  if (hasDatabase()) {
+    try {
+      history = (await loadConversation(conversationKey)) || [];
+    } catch (e) {
+      console.warn('[llm] Không nạp được lịch sử hội thoại từ DB:', e);
+    }
+  }
+  histories.set(conversationKey, history);
+  return history;
 }
 
 /**
@@ -169,7 +182,7 @@ export async function generateReply(senderId, userText, options = {}) {
     };
   }
 
-  const history = getHistory(conversationKey);
+  const history = await getHistory(conversationKey);
   history.push({ role: 'user', content: userText });
 
   const messages = [{ role: 'system', content: buildSystemPrompt(campaign, options.userProfile) }, ...history];
@@ -222,6 +235,11 @@ export async function generateReply(senderId, userText, options = {}) {
     const cleanText = text || 'Dạ em gửi anh/chị xem ảnh ạ 😊';
     history.push({ role: 'assistant', content: cleanText });
     if (history.length > MAX_TURNS) history.splice(0, history.length - MAX_TURNS);
+    if (hasDatabase()) {
+      saveConversation(conversationKey, history).catch((e) =>
+        console.warn('[llm] Không lưu được lịch sử hội thoại vào DB:', e)
+      );
+    }
 
     return {
       text: cleanText,
