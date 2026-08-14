@@ -306,11 +306,13 @@ function renderFacebookConnections(pageConnections, campaignSlug) {
         <td><span class="pill active">Đã kết nối</span></td>
         <td class="muted">${new Date(p.connected_at).toLocaleString('vi-VN')}</td>
         <td>
-          <form method="post" action="/oauth/facebook/disconnect" onsubmit="return confirm('Ngắt kết nối Trang \\'${escapeHtml(p.page_name || '')}\\'? Có thể kết nối lại bất cứ lúc nào.');">
-            <input type="hidden" name="pageId" value="${escapeHtml(p.page_id)}">
-            <input type="hidden" name="campaign" value="${escapeHtml(campaignSlug)}">
-            <button type="submit" class="button ghost">Ngắt kết nối</button>
-          </form>
+          <button
+            type="submit"
+            class="button ghost"
+            formaction="/oauth/facebook/disconnect?pageId=${encodeURIComponent(p.page_id)}&campaign=${encodeURIComponent(campaignSlug)}"
+            formmethod="post"
+            onclick="return confirm('Ngắt kết nối Trang \'${escapeHtml(p.page_name || '')}\'? Có thể kết nối lại bất cứ lúc nào.');"
+          >Ngắt kết nối</button>
         </td>
       </tr>`
     )

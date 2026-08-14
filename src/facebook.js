@@ -245,7 +245,9 @@ export function mountFacebookOAuth(app) {
   // Ngắt kết nối 1 Trang khỏi Campaign — xoá token trong DB, để kết nối lại từ đầu
   // (VD: muốn quay video App Review lại full luồng Facebook Login).
   app.post('/oauth/facebook/disconnect', requireAdminAuth, route(async (req, res) => {
-    const { pageId, campaign: campaignSlug } = req.body;
+    // Đọc từ query string (không phải body) — nút nằm trong <form> lưu campaign chung,
+    // dùng formaction để tách endpoint mà không phải lồng <form> (HTML không cho lồng form).
+    const { pageId, campaign: campaignSlug } = req.query;
     if (!pageId || !campaignSlug) return res.status(400).send('Thiếu dữ liệu.');
     const campaign = await deletePageConnection(pageId, campaignSlug);
     const redirectId = campaign?.id ?? campaignSlug;
