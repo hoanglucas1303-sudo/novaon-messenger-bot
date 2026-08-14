@@ -48,7 +48,7 @@ function formatCurrency(value) {
 }
 
 // Dựng system prompt từ persona + luật + catalog (Kiểu A)
-function buildSystemPrompt(campaign) {
+function buildSystemPrompt(campaign, userProfile) {
   const promptData = campaignToPromptData(campaign || defaultCampaign());
   const rules = promptData.rulesList.map((r, i) => `${i + 1}. ${r}`).join('\n');
   const knowledge = promptData.knowledge
@@ -58,8 +58,19 @@ ${promptData.knowledge}
 `
     : '';
 
-  return `${promptData.persona}
+  const genderLabel = { male: 'nam → gọi "anh"', female: 'nữ → gọi "chị"' }[userProfile?.gender] || 'không rõ → cứ dùng "anh/chị"';
+  const profileBlock = userProfile?.name
+    ? `
+# THÔNG TIN KHÁCH (lấy từ Facebook, KHÔNG hỏi lại tên nếu đã có ở đây)
+Tên hiển thị Facebook: ${userProfile.name}
+Giới tính suy đoán từ tên (không chắc chắn tuyệt đối, chỉ để xưng hô): ${genderLabel}
+Dùng tên này để xưng hô cá nhân hoá khi phù hợp. Nếu khách tự giới thiệu tên khác hoặc
+tự chỉnh lại xưng hô ("gọi mình là chị nhé"...), LUÔN ưu tiên theo lời khách nói, bỏ qua suy đoán ở trên.
+`
+    : '';
 
+  return `${promptData.persona}
+${profileBlock}
 # LUẬT TRẢ LỜI (bắt buộc tuân thủ)
 ${rules}
 ${knowledge}
@@ -80,7 +91,9 @@ KHÔNG nhắc tới "##IMG" hay việc gửi ảnh bằng cú pháp trong lời 
 Khi khách đã cung cấp số điện thoại, hoặc đồng ý để nhân viên tư vấn liên hệ và đã có số điện thoại trong hội thoại,
 hãy xác nhận minh bạch rằng bộ phận tư vấn sẽ liên hệ hỗ trợ, rồi THÊM một dòng RIÊNG ở CUỐI theo đúng cú pháp JSON:
 ##LEAD: {"customerName":"<tên nếu biết>","phone":"<số điện thoại>","productInterest":"<sản phẩm quan tâm>","note":"<nhu cầu/ghi chú ngắn>"}
-Nếu chưa có số điện thoại thì KHÔNG thêm ##LEAD; hãy hỏi xin tên và số điện thoại một cách lịch sự.
+Nếu đã có "Tên hiển thị Facebook" ở phần THÔNG TIN KHÁCH phía trên, dùng luôn tên đó cho customerName —
+KHÔNG hỏi lại tên khách, trừ khi khách tự nói tên khác. Nếu chưa có số điện thoại thì KHÔNG thêm ##LEAD;
+hãy hỏi xin số điện thoại một cách lịch sự (không cần hỏi tên nếu đã có tên Facebook).
 CHỈ dùng dữ liệu khách đã nói hoặc suy luận trực tiếp từ hội thoại, không bịa tên, số điện thoại, nhu cầu.
 KHÔNG nhắc tới "##LEAD" hay việc lưu bằng cú pháp trong lời thoại với khách.`;
 }
@@ -159,7 +172,7 @@ export async function generateReply(senderId, userText, options = {}) {
   const history = getHistory(conversationKey);
   history.push({ role: 'user', content: userText });
 
-  const messages = [{ role: 'system', content: buildSystemPrompt(campaign) }, ...history];
+  const messages = [{ role: 'system', content: buildSystemPrompt(campaign, options.userProfile) }, ...history];
 
   try {
     const res = await fetch(OPENROUTER_URL, {

@@ -13,6 +13,7 @@ import { mountMediaRoutes } from './media.js';
 import { mountFacebookOAuth, initPageConnections, getPageConnectionByPageId } from './facebook.js';
 import { sendText, sendImages, sendTypingOn } from './messenger.js';
 import { generateReply } from './llm.js';
+import { getSenderProfile } from './profile.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -98,10 +99,13 @@ async function handleEvent(event) {
     const campaign = await findCampaignByPageId(pageId);
     console.log(`[msg] ${senderId}: ${text}`);
     await sendTypingOn(senderId, pageToken);
+    // public_profile: lấy tên hiển thị Facebook để bot xưng hô đúng, khỏi hỏi lại tên.
+    const userProfile = await getSenderProfile(senderId, pageToken);
     const { text: reply, images, lead, conversation, modelTier } = await generateReply(senderId, text, {
       campaign,
       conversationKey: `messenger:${campaign.slug}:${senderId}`,
       modelMode: 'auto',
+      userProfile,
     });
     await sendText(senderId, reply, pageToken);
     if (images.length) await sendImages(senderId, images, pageToken);
