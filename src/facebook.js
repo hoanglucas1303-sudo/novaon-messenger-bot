@@ -84,6 +84,24 @@ async function savePageConnection({ pageId, pageName, pageAccessToken, campaignS
   return result?.rows[0] || null;
 }
 
+async function deletePageConnection(pageId, campaignSlug) {
+  await query('DELETE FROM page_connections WHERE page_id = $1', [String(pageId)]);
+  const campaign = await getCampaignBySlug(campaignSlug);
+  if (!campaign || !campaign.page_ids.includes(pageId)) return campaign;
+  return saveCampaign({
+    id: campaign.id,
+    slug: campaign.slug,
+    name: campaign.name,
+    brandName: campaign.brand_name,
+    persona: campaign.persona,
+    rules: campaign.rules,
+    knowledge: campaign.knowledge,
+    products: campaign.products,
+    page_ids: campaign.page_ids.filter((id) => id !== pageId),
+    active: campaign.active,
+  });
+}
+
 async function addPageIdToCampaign(slug, pageId) {
   const campaign = await getCampaignBySlug(slug);
   if (!campaign) return null;
@@ -222,6 +240,16 @@ export function mountFacebookOAuth(app) {
       console.error('[facebook] Lỗi hoàn tất kết nối:', e);
       res.status(500).send(renderMessage('Có lỗi xảy ra', 'Vui lòng thử lại.'));
     }
+  }));
+
+  // Ngắt kết nối 1 Trang khỏi Campaign — xoá token trong DB, để kết nối lại từ đầu
+  // (VD: muốn quay video App Review lại full luồng Facebook Login).
+  app.post('/oauth/facebook/disconnect', requireAdminAuth, route(async (req, res) => {
+    const { pageId, campaign: campaignSlug } = req.body;
+    if (!pageId || !campaignSlug) return res.status(400).send('Thiếu dữ liệu.');
+    const campaign = await deletePageConnection(pageId, campaignSlug);
+    const redirectId = campaign?.id ?? campaignSlug;
+    res.redirect(`/studio/campaigns/${redirectId}/edit`);
   }));
 }
 

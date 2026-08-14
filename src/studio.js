@@ -251,7 +251,7 @@ function renderCampaignForm(campaign, options = {}) {
           <h2>Kết nối Trang Facebook</h2>
           <p>Kết nối thật qua Facebook Login — hệ thống tự lấy Page Access Token và tự đăng ký webhook cho Trang, không cần vào console Meta.</p>
         </div>
-        ${renderFacebookConnections(pageConnections)}
+        ${renderFacebookConnections(pageConnections, campaign.slug)}
         ${
           isSaved
             ? `<a class="button facebook" href="/oauth/facebook/connect?campaign=${encodeURIComponent(campaign.slug)}"><img src="/assets/brand/facebook-logo.png" alt=""> Kết nối với Facebook</a>`
@@ -294,7 +294,7 @@ function renderCampaignForm(campaign, options = {}) {
   `;
 }
 
-function renderFacebookConnections(pageConnections) {
+function renderFacebookConnections(pageConnections, campaignSlug) {
   if (!pageConnections.length) {
     return '<p class="muted" style="margin-bottom:12px">Chưa kết nối Trang nào qua Facebook Login.</p>';
   }
@@ -305,6 +305,13 @@ function renderFacebookConnections(pageConnections) {
         <td><strong>${escapeHtml(p.page_name || 'Không rõ tên')}</strong><br><span class="muted">ID: ${escapeHtml(p.page_id)}</span></td>
         <td><span class="pill active">Đã kết nối</span></td>
         <td class="muted">${new Date(p.connected_at).toLocaleString('vi-VN')}</td>
+        <td>
+          <form method="post" action="/oauth/facebook/disconnect" onsubmit="return confirm('Ngắt kết nối Trang \\'${escapeHtml(p.page_name || '')}\\'? Có thể kết nối lại bất cứ lúc nào.');">
+            <input type="hidden" name="pageId" value="${escapeHtml(p.page_id)}">
+            <input type="hidden" name="campaign" value="${escapeHtml(campaignSlug)}">
+            <button type="submit" class="button ghost">Ngắt kết nối</button>
+          </form>
+        </td>
       </tr>`
     )
     .join('');
@@ -370,6 +377,8 @@ function renderStudioPage({ title, body }) {
       .button.facebook { background: #1877f2; border-color: #1877f2; color: #fff; }
       .button.facebook:hover { background: #166fe5; border-color: #166fe5; }
       .button.facebook img { width: 20px; height: 20px; display: block; }
+      .button.ghost { background: transparent; color: var(--muted); border-color: var(--line); min-height: 32px; padding: 6px 10px; font-size: 12px; font-weight: 700; }
+      .button.ghost:hover { color: #d92d20; border-color: #fda29b; background: #fff7f6; }
       .back { display: inline-block; margin-bottom: 8px; }
       .notice { background: #fff1e8; color: var(--brand-dark); border: 1px solid #ffd1b8; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-weight: 800; }
       section, table { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
