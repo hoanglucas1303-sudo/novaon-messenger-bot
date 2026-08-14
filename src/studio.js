@@ -85,9 +85,10 @@ export function mountStudio(app) {
     const text = String(req.body.text || '').trim();
     if (!text) return res.status(400).json({ error: 'Missing text' });
 
+    const conversationKey = `web:${campaign.slug}:${sessionId}`;
     const result = await generateReply(sessionId, text, {
       campaign,
-      conversationKey: `web:${campaign.slug}:${sessionId}`,
+      conversationKey,
       modelMode: normalizeModelMode(req.body.modelMode),
     });
 
@@ -96,6 +97,7 @@ export function mountStudio(app) {
         campaignId: campaign.slug,
         senderId: sessionId,
         channel: 'web',
+        conversationKey,
         lead: result.lead,
         conversation: result.conversation,
       });

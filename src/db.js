@@ -63,6 +63,18 @@ export async function initDatabase() {
     CREATE INDEX IF NOT EXISTS leads_campaign_id_idx ON leads (campaign_id);
     CREATE INDEX IF NOT EXISTS leads_channel_idx ON leads (channel);
   `);
+
+  // Lead là CHẮT LỌC từ 1 luồng chat, không phải sự kiện độc lập — "cha" của lead
+  // luôn là luồng chat (conversation_key, định danh theo FB PSID/session). 1 luồng
+  // chat chỉ tạo ra ĐÚNG 1 lead; khách nhắn lại nhiều lần / cung cấp lại SĐT chỉ
+  // cập nhật lại cùng 1 dòng, không đẻ thêm lead mới (tránh trùng/spam khi báo Sale).
+  // Index là PARTIAL (WHERE conversation_key IS NOT NULL) để lead cũ trước khi có
+  // cột này (NULL) không bị vướng ràng buộc unique.
+  await db.query(`
+    ALTER TABLE leads ADD COLUMN IF NOT EXISTS conversation_key TEXT;
+    CREATE UNIQUE INDEX IF NOT EXISTS leads_conversation_key_idx
+      ON leads (conversation_key) WHERE conversation_key IS NOT NULL;
+  `);
   console.log('[db] Bảng leads sẵn sàng ✅');
 
   // Lịch sử hội thoại — lưu để sống sót qua redeploy (Railway build lại là RAM mất sạch).
@@ -97,7 +109,7 @@ export async function saveConversation(conversationKey, history) {
   );
 }
 
-export async function createLead({ campaignId, pageId, senderId, channel = 'messenger', lead, conversation }) {
+export async function createLead({ campaignId, pageId, senderId, channel = 'messenger', conversationKey, lead, conversation }) {
   const normalized = normalizeLead(lead);
   if (!normalized.phone) {
     console.warn('[lead] Bỏ qua lead vì thiếu số điện thoại:', lead);
@@ -110,33 +122,42 @@ export async function createLead({ campaignId, pageId, senderId, channel = 'mess
     return null;
   }
 
+  // Lead là chắt lọc từ 1 luồng chat (conversation_key = cha) — cùng luồng nhắn
+  // lại nhiều lần chỉ cập nhật lại đúng 1 dòng, không đẻ thêm lead trùng.
+  // Không có conversationKey (gọi cũ/thiếu) thì vẫn ghi được nhưng mất khả năng
+  // dedupe cho lần đó — INSERT thường, không upsert.
+  const params = [
+    campaignId || null,
+    pageId || null,
+    senderId,
+    channel,
+    normalized.customerName || null,
+    normalized.phone,
+    normalized.productInterest || null,
+    normalized.note || null,
+    JSON.stringify(conversation || []),
+    conversationKey || null,
+  ];
+
   const result = await db.query(
     `
       INSERT INTO leads (
-        campaign_id,
-        page_id,
-        sender_id,
-        channel,
-        customer_name,
-        phone,
-        product_interest,
-        note,
-        conversation
+        campaign_id, page_id, sender_id, channel,
+        customer_name, phone, product_interest, note, conversation, conversation_key
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
-      RETURNING *
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10)
+      ON CONFLICT (conversation_key) WHERE conversation_key IS NOT NULL DO UPDATE SET
+        customer_name = EXCLUDED.customer_name,
+        phone = EXCLUDED.phone,
+        product_interest = EXCLUDED.product_interest,
+        note = EXCLUDED.note,
+        conversation = EXCLUDED.conversation,
+        channel = EXCLUDED.channel,
+        page_id = EXCLUDED.page_id,
+        updated_at = NOW()
+      RETURNING *, (xmax = 0) AS is_new_lead
     `,
-    [
-      campaignId || null,
-      pageId || null,
-      senderId,
-      channel,
-      normalized.customerName || null,
-      normalized.phone,
-      normalized.productInterest || null,
-      normalized.note || null,
-      JSON.stringify(conversation || []),
-    ]
+    params
   );
 
   return result.rows[0];

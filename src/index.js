@@ -101,9 +101,10 @@ async function handleEvent(event) {
     await sendTypingOn(senderId, pageToken);
     // public_profile: lấy tên hiển thị Facebook để bot xưng hô đúng, khỏi hỏi lại tên.
     const userProfile = await getSenderProfile(senderId, pageToken);
+    const conversationKey = `messenger:${campaign.slug}:${senderId}`;
     const { text: reply, images, lead, conversation, modelTier } = await generateReply(senderId, text, {
       campaign,
-      conversationKey: `messenger:${campaign.slug}:${senderId}`,
+      conversationKey,
       modelMode: 'auto',
       userProfile,
     });
@@ -115,10 +116,14 @@ async function handleEvent(event) {
         pageId,
         senderId,
         channel: 'messenger',
+        conversationKey,
         lead,
         conversation,
       });
-      if (savedLead) console.log(`[lead] Đã lưu lead #${savedLead.id} từ ${senderId}`);
+      if (savedLead) {
+        const action = savedLead.is_new_lead ? 'Đã lưu lead mới' : 'Đã cập nhật lead';
+        console.log(`[lead] ${action} #${savedLead.id} từ ${senderId}`);
+      }
     }
     console.log(
       `[bot] ${senderId}: ${reply}${images.length ? ` (+${images.length} ảnh)` : ''}${lead ? ' (+lead)' : ''}${modelTier ? ` (${modelTier})` : ''}`
